@@ -469,7 +469,7 @@ function Letter() {
             Today is your day, my love. So blow out the candles and make a wish — but know that mine is already locked in:
             <br />a long, healthy, ridiculous life with you. Doctor Amal and her favorite patient, me. 🩺💗
             <br /><br />
-            Happy Birthday, Amal. I love you in every language I know, and a few I'm still inventing.
+            Happy Birthday, Amal. Kanbghik bzaf — I love you in every language I know, and a few I'm still inventing.
           </p>
           <p className="mt-6 font-script text-3xl text-rose">— Yasser</p>
         </div>

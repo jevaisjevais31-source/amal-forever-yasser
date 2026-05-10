@@ -838,7 +838,10 @@ function Index() {
         <LoveQuestion />
         <Reasons />
         <HeartCatchGame />
+        <LoveWheel />
+        <MemoryMatch />
         <Timeline />
+        <SecretVault />
         <Letter />
         <FinalSurprise />
         <Footer />

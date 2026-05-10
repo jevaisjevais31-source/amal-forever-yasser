@@ -5,35 +5,25 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// 32 days together as of 11/05 (her birthday). Anchor start date so the counter ticks forward in real time.
+// 32 days together as of 11/05 (her birthday). Anchor so counter ticks forever.
 const ANCHOR_DATE = new Date("2026-05-11T00:00:00");
 const ANCHOR_DAYS = 32;
 
-function useDaysCounter() {
+function useTogether() {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 50);
     return () => clearInterval(id);
   }, []);
-  // Smoothly accelerate from 32 days up to ~5 years (1825 days) over a short reveal animation, then keep ticking real-time
-  const [phase, setPhase] = useState<"reveal" | "live">("reveal");
-  const startRef = useRef<number>(Date.now());
-  useEffect(() => {
-    const t = setTimeout(() => setPhase("live"), 4200);
-    return () => clearTimeout(t);
-  }, []);
-  if (phase === "reveal") {
-    const elapsed = (now - startRef.current) / 4200;
-    const t = Math.min(1, Math.max(0, elapsed));
-    const eased = 1 - Math.pow(1 - t, 3);
-    const target = 1825; // 5 years in days
-    const days = ANCHOR_DAYS + (target - ANCHOR_DAYS) * eased;
-    return { days, phase };
-  }
-  // live phase – count from anchor in real time, with sub-second precision
   const diffMs = now - ANCHOR_DATE.getTime();
-  const days = ANCHOR_DAYS + diffMs / (1000 * 60 * 60 * 24);
-  return { days: Math.max(ANCHOR_DAYS, days), phase };
+  const totalMs = ANCHOR_DAYS * 86400000 + diffMs;
+  const totalSec = Math.max(ANCHOR_DAYS * 86400, totalMs / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = Math.floor(totalSec % 60);
+  const ms = Math.floor((totalSec * 1000) % 1000);
+  return { days, hours, minutes, seconds, ms };
 }
 
 function FloatingHearts() {
@@ -70,10 +60,14 @@ function FloatingHearts() {
 }
 
 function Hero() {
-  const { days } = useDaysCounter();
-  const whole = Math.floor(days);
-  const decimals = ((days - whole) * 10000).toFixed(0).padStart(4, "0");
-  const years = (days / 365).toFixed(2);
+  const { days, hours, minutes, seconds, ms } = useTogether();
+  const cells: { label: string; value: string }[] = [
+    { label: "days", value: String(days) },
+    { label: "hours", value: String(hours).padStart(2, "0") },
+    { label: "minutes", value: String(minutes).padStart(2, "0") },
+    { label: "seconds", value: String(seconds).padStart(2, "0") },
+    { label: "ms", value: String(ms).padStart(3, "0") },
+  ];
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center">
       <p className="font-script text-2xl md:text-3xl text-rose animate-fade-up">to my dearest</p>
@@ -84,18 +78,23 @@ function Hero() {
         Happy Birthday, my love · 11 / 05
       </p>
 
-      <div className="mt-14 rounded-3xl border border-rose/20 bg-card/70 backdrop-blur-md px-8 md:px-14 py-8 shadow-romantic animate-fade-up" style={{ animationDelay: "0.9s" }}>
-        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Days since you became mine</p>
-        <div className="mt-3 flex items-baseline justify-center gap-2 font-display">
-          <span className="text-6xl md:text-8xl font-semibold text-primary tabular-nums">{whole}</span>
-          <span className="text-2xl md:text-3xl text-rose tabular-nums">.{decimals}</span>
-          <span className="ml-2 text-xl md:text-2xl text-muted-foreground">days</span>
+      <div className="mt-14 rounded-3xl border border-rose/20 bg-card/70 backdrop-blur-md px-6 md:px-12 py-8 shadow-romantic animate-fade-up" style={{ animationDelay: "0.9s" }}>
+        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">since you became mine</p>
+        <div className="mt-4 flex flex-wrap items-end justify-center gap-3 md:gap-5 font-display">
+          {cells.map((c, i) => (
+            <div key={c.label} className="flex flex-col items-center min-w-[64px]">
+              <span className={`tabular-nums font-semibold ${i === 0 ? "text-5xl md:text-7xl text-primary" : "text-3xl md:text-5xl text-rose"}`}>
+                {c.value}
+              </span>
+              <span className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">{c.label}</span>
+            </div>
+          ))}
         </div>
-        <p className="mt-2 text-sm text-muted-foreground">that's {years} years of you and me 💞</p>
+        <p className="mt-4 text-sm text-muted-foreground">…and counting forever 💞</p>
       </div>
 
       <p className="mt-12 max-w-xl text-muted-foreground animate-fade-up" style={{ animationDelay: "1.2s" }}>
-        Scroll down, my love — I made every inch of this for you. ↓
+        Scroll down, my love — every inch is for you. ↓
       </p>
     </section>
   );
@@ -159,7 +158,6 @@ function LoveQuestion() {
   const handleNo = () => {
     setYesScale((s) => s * 1.45);
     setNoClicks((c) => c + 1);
-    // make the no button run away
     setNoPos({ x: (Math.random() - 0.5) * 300, y: (Math.random() - 0.5) * 100 });
   };
 
@@ -211,25 +209,77 @@ const reasons = [
   "You. Just you. All of you.",
 ];
 
+type Burst = { id: number; x: number; y: number; emoji: string };
+
 function Reasons() {
+  const [revealed, setRevealed] = useState<Set<number>>(new Set());
+  const [bursts, setBursts] = useState<Burst[]>([]);
+  const idRef = useRef(0);
+
+  const reveal = (i: number, e: React.MouseEvent) => {
+    setRevealed((s) => new Set(s).add(i));
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const emojis = ["🌸", "🌹", "💐", "💖", "🌷", "💕", "✨", "🌺"];
+    const newBursts: Burst[] = Array.from({ length: 14 }, () => ({
+      id: idRef.current++,
+      x: cx + (Math.random() - 0.5) * 60,
+      y: cy + (Math.random() - 0.5) * 60,
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+    }));
+    setBursts((b) => [...b, ...newBursts]);
+    setTimeout(() => {
+      setBursts((b) => b.filter((x) => !newBursts.find((n) => n.id === x.id)));
+    }, 1600);
+  };
+
   return (
     <section className="relative px-6 py-24">
       <div className="max-w-5xl mx-auto text-center">
         <h2 className="text-4xl md:text-6xl font-display text-deep">9 reasons</h2>
-        <p className="mt-3 font-script text-2xl text-rose">…out of an infinite list</p>
+        <p className="mt-3 font-script text-2xl text-rose">tap each card to reveal 💝</p>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {reasons.map((r, i) => (
-            <div
-              key={i}
-              className="group relative rounded-2xl border border-rose/20 bg-card/70 backdrop-blur p-6 text-left shadow-sm hover:shadow-romantic hover:-translate-y-1 transition-all"
-              style={{ animation: `fade-up 0.6s ease-out ${i * 0.08}s both` }}
-            >
-              <div className="text-3xl text-gold font-display">0{i + 1}</div>
-              <p className="mt-2 font-display text-lg text-deep italic leading-snug">{r}</p>
-              <span className="absolute top-4 right-4 text-xl opacity-0 group-hover:opacity-100 transition">💗</span>
-            </div>
-          ))}
+          {reasons.map((r, i) => {
+            const isOpen = revealed.has(i);
+            return (
+              <button
+                key={i}
+                onClick={(e) => reveal(i, e)}
+                className="group relative rounded-2xl border border-rose/20 bg-card/70 backdrop-blur p-6 text-left shadow-sm hover:shadow-romantic hover:-translate-y-1 transition-all min-h-[140px] overflow-hidden"
+                style={{ animation: `fade-up 0.6s ease-out ${i * 0.08}s both` }}
+              >
+                <div className="text-3xl text-gold font-display">0{i + 1}</div>
+                {isOpen ? (
+                  <p className="mt-2 font-display text-lg text-deep italic leading-snug animate-fade-up">{r}</p>
+                ) : (
+                  <p className="mt-2 font-script text-xl text-rose/80">tap to reveal…</p>
+                )}
+                <span className="absolute top-4 right-4 text-xl">{isOpen ? "💗" : "🤍"}</span>
+              </button>
+            );
+          })}
         </div>
+      </div>
+
+      {/* burst layer */}
+      <div className="pointer-events-none fixed inset-0 z-40">
+        {bursts.map((b) => (
+          <span
+            key={b.id}
+            className="absolute text-2xl"
+            style={{
+              left: b.x,
+              top: b.y,
+              animation: "burst 1.5s ease-out forwards",
+              ["--bx" as string]: `${(Math.random() - 0.5) * 240}px`,
+              ["--by" as string]: `${-120 - Math.random() * 160}px`,
+              ["--br" as string]: `${(Math.random() - 0.5) * 540}deg`,
+            }}
+          >
+            {b.emoji}
+          </span>
+        ))}
       </div>
     </section>
   );
@@ -271,6 +321,123 @@ function Timeline() {
   );
 }
 
+// ---------- MINI GAME: Catch the falling hearts ----------
+type FallingHeart = { id: number; x: number; y: number; vy: number; emoji: string };
+
+function HeartCatchGame() {
+  const [playing, setPlaying] = useState(false);
+  const [score, setScore] = useState(0);
+  const [time, setTime] = useState(20);
+  const [hearts, setHearts] = useState<FallingHeart[]>([]);
+  const [best, setBest] = useState(0);
+  const idRef = useRef(0);
+  const areaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!playing) return;
+    const spawn = setInterval(() => {
+      const w = areaRef.current?.clientWidth ?? 300;
+      setHearts((h) => [
+        ...h,
+        {
+          id: idRef.current++,
+          x: Math.random() * (w - 40),
+          y: -30,
+          vy: 1 + Math.random() * 2.5,
+          emoji: ["💖", "💗", "💕", "🌸", "🌹"][Math.floor(Math.random() * 5)],
+        },
+      ]);
+    }, 380);
+    const move = setInterval(() => {
+      setHearts((h) => {
+        const max = areaRef.current?.clientHeight ?? 360;
+        return h
+          .map((p) => ({ ...p, y: p.y + p.vy * 4 }))
+          .filter((p) => p.y < max + 40);
+      });
+    }, 30);
+    const tick = setInterval(() => {
+      setTime((t) => {
+        if (t <= 1) {
+          setPlaying(false);
+          setBest((b) => Math.max(b, score));
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => {
+      clearInterval(spawn);
+      clearInterval(move);
+      clearInterval(tick);
+    };
+  }, [playing, score]);
+
+  const start = () => {
+    setScore(0);
+    setTime(20);
+    setHearts([]);
+    setPlaying(true);
+  };
+
+  const catchHeart = (id: number) => {
+    setHearts((h) => h.filter((p) => p.id !== id));
+    setScore((s) => s + 1);
+  };
+
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <h2 className="text-4xl md:text-6xl font-display text-deep">Catch my love 💕</h2>
+      <p className="mt-3 font-script text-2xl text-rose">tap as many hearts as you can in 20 seconds</p>
+
+      <div className="mt-8 mx-auto max-w-2xl">
+        <div className="flex items-center justify-between font-display text-lg text-deep px-2">
+          <span>⏱ {time}s</span>
+          <span>💗 {score}</span>
+          <span className="text-gold">★ best {best}</span>
+        </div>
+        <div
+          ref={areaRef}
+          className="relative mt-3 h-[360px] rounded-3xl border border-rose/30 bg-card/60 backdrop-blur overflow-hidden"
+        >
+          {!playing && time === 20 && (
+            <button
+              onClick={start}
+              className="absolute inset-0 m-auto h-fit w-fit rounded-full px-8 py-4 text-lg font-medium text-primary-foreground shadow-romantic"
+              style={{ background: "var(--gradient-romance)" }}
+            >
+              ▶ Start
+            </button>
+          )}
+          {!playing && time === 0 && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <p className="font-display text-3xl text-deep">You caught {score} 💗</p>
+              <p className="font-script text-xl text-rose">…but you've already caught all of mine.</p>
+              <button
+                onClick={start}
+                className="mt-2 rounded-full px-6 py-3 text-primary-foreground shadow-romantic"
+                style={{ background: "var(--gradient-romance)" }}
+              >
+                play again
+              </button>
+            </div>
+          )}
+          {hearts.map((h) => (
+            <button
+              key={h.id}
+              onClick={() => catchHeart(h.id)}
+              className="absolute text-3xl select-none active:scale-125 transition-transform"
+              style={{ left: h.x, top: h.y }}
+            >
+              {h.emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Letter() {
   const [open, setOpen] = useState(false);
   return (
@@ -283,18 +450,14 @@ function Letter() {
           className="relative w-72 h-48 transition-transform hover:-translate-y-1"
           aria-label="Open letter"
         >
-          <div
-            className="absolute inset-0 rounded-lg shadow-romantic"
-            style={{ background: "var(--gradient-romance)" }}
-          />
+          <div className="absolute inset-0 rounded-lg shadow-romantic" style={{ background: "var(--gradient-romance)" }} />
           <div className="absolute inset-0 flex items-center justify-center text-6xl">{open ? "💌" : "✉️"}</div>
         </button>
       </div>
       {open && (
         <div className="mx-auto mt-10 max-w-2xl rounded-3xl border border-rose/20 bg-card/80 backdrop-blur p-10 text-left shadow-romantic animate-fade-up">
           <p className="font-display text-xl md:text-2xl leading-relaxed text-deep italic">
-            My Amal,
-            <br /><br />
+            My Amal,<br /><br />
             I'm writing this from too many kilometers away, but somehow you feel closer than the people in the same room as me.
             32 days. That's all it took for you to become the first thought when I wake and the last when I sleep.
             <br /><br />
@@ -307,6 +470,127 @@ function Letter() {
             Happy Birthday, Amal. I love you in every language I know, and a few I'm still inventing.
           </p>
           <p className="mt-6 font-script text-3xl text-rose">— Yasser</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ---------- FINAL SURPRISE ----------
+function playRomanticChord() {
+  try {
+    const AC: typeof AudioContext =
+      (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext);
+    const ctx = new AC();
+    const master = ctx.createGain();
+    master.gain.value = 0.0001;
+    master.connect(ctx.destination);
+    // gentle swell
+    master.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 1.2);
+    master.gain.exponentialRampToValueAtTime(0.32, ctx.currentTime + 4);
+    master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 11);
+
+    // C major 9 — warm romantic
+    const notes = [261.63, 329.63, 392.0, 493.88, 587.33];
+    notes.forEach((f, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = i % 2 ? "sine" : "triangle";
+      o.frequency.value = f;
+      g.gain.value = 0.18;
+      // slow vibrato
+      const lfo = ctx.createOscillator();
+      const lfoG = ctx.createGain();
+      lfo.frequency.value = 4 + i * 0.3;
+      lfoG.gain.value = 1.5;
+      lfo.connect(lfoG).connect(o.frequency);
+      o.connect(g).connect(master);
+      o.start();
+      lfo.start();
+      o.stop(ctx.currentTime + 11);
+      lfo.stop(ctx.currentTime + 11);
+    });
+    setTimeout(() => ctx.close(), 12000);
+  } catch {
+    /* no audio — silent fallback */
+  }
+}
+
+type Particle = { id: number; left: number; delay: number; size: number; type: "heart" | "star"; dur: number; tx: number; ty: number; rot: number };
+
+function FinalSurprise() {
+  const [active, setActive] = useState(false);
+  const particles = useMemo<Particle[]>(() => {
+    if (!active) return [];
+    return Array.from({ length: 80 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 2.5,
+      size: 18 + Math.random() * 36,
+      type: Math.random() > 0.45 ? "heart" : "star",
+      dur: 3 + Math.random() * 4,
+      tx: (Math.random() - 0.5) * 160,
+      ty: -120 - Math.random() * 280,
+      rot: (Math.random() - 0.5) * 720,
+    }));
+  }, [active]);
+
+  const trigger = () => {
+    setActive(true);
+    playRomanticChord();
+  };
+
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <h2 className="text-3xl md:text-5xl font-display text-deep">one last thing…</h2>
+      <button
+        onClick={trigger}
+        className="mt-8 rounded-full px-10 py-6 text-xl font-semibold text-primary-foreground shadow-romantic hover:scale-105 active:scale-95 transition-transform"
+        style={{ background: "var(--gradient-romance)" }}
+      >
+        ✨ Click here for one last surprise ✨
+      </button>
+
+      {active && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center px-6 text-center overflow-hidden"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, oklch(0.35 0.18 5 / 0.92) 0%, oklch(0.18 0.12 350 / 0.96) 70%, oklch(0.1 0.08 340 / 0.98) 100%)",
+          }}
+          onClick={() => setActive(false)}
+        >
+          {/* particles */}
+          <div className="pointer-events-none absolute inset-0">
+            {particles.map((p) => (
+              <span
+                key={p.id}
+                className="absolute"
+                style={{
+                  left: `${p.left}%`,
+                  bottom: "-40px",
+                  fontSize: p.size,
+                  animation: p.type === "star" ? `star-grow ${p.dur}s ease-out ${p.delay}s forwards` : `heart-explode ${p.dur}s ease-out ${p.delay}s forwards`,
+                  ["--tx" as string]: `${p.tx}px`,
+                  ["--ty" as string]: `${p.ty}px`,
+                  ["--rot" as string]: `${p.rot}deg`,
+                }}
+              >
+                {p.type === "star" ? "✨" : Math.random() > 0.5 ? "💖" : "💗"}
+              </span>
+            ))}
+          </div>
+
+          <div className="relative z-10 max-w-3xl animate-fade-up">
+            <p className="font-script text-3xl md:text-5xl text-blush">my Amal,</p>
+            <h3 className="mt-4 font-display text-4xl md:text-7xl leading-tight text-shimmer">
+              You are the best thing that ever happened to me.
+            </h3>
+            <p className="mt-8 font-script text-2xl md:text-4xl text-blush leading-snug">
+              ghakhtarek mlyar mra · kola nhar a Amal 💕
+            </p>
+            <p className="mt-10 text-sm text-blush/70">tap anywhere to close</p>
+          </div>
         </div>
       )}
     </section>
@@ -335,8 +619,10 @@ function Index() {
         <BirthdayWish />
         <LoveQuestion />
         <Reasons />
+        <HeartCatchGame />
         <Timeline />
         <Letter />
+        <FinalSurprise />
         <Footer />
       </div>
     </main>

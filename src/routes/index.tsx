@@ -27,17 +27,19 @@ function useTogether() {
 }
 
 function FloatingHearts() {
-  const hearts = useMemo(
-    () => Array.from({ length: 18 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 12,
-      duration: 10 + Math.random() * 10,
-      size: 14 + Math.random() * 22,
-      opacity: 0.4 + Math.random() * 0.5,
-    })),
-    []
-  );
+  const [hearts, setHearts] = useState<{ id: number; left: number; delay: number; duration: number; size: number; opacity: number }[]>([]);
+  useEffect(() => {
+    setHearts(
+      Array.from({ length: 18 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 12,
+        duration: 10 + Math.random() * 10,
+        size: 14 + Math.random() * 22,
+        opacity: 0.4 + Math.random() * 0.5,
+      }))
+    );
+  }, []);
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
       {hearts.map((h) => (
@@ -70,12 +72,12 @@ function Hero() {
   ];
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <p className="font-script text-2xl md:text-3xl text-rose animate-fade-up">to my dearest</p>
+      <p className="font-script text-2xl md:text-3xl text-rose animate-fade-up">to my dearest habibti</p>
       <h1 className="mt-2 text-7xl md:text-9xl font-display font-semibold text-shimmer animate-fade-up" style={{ animationDelay: "0.2s" }}>
         Amal
       </h1>
       <p className="mt-6 text-xl md:text-2xl font-display italic text-deep animate-fade-up" style={{ animationDelay: "0.5s" }}>
-        Happy Birthday, my love · 11 / 05
+        Happy Birthday, ya hayati · 11 / 05
       </p>
 
       <div className="mt-14 rounded-3xl border border-rose/20 bg-card/70 backdrop-blur-md px-6 md:px-12 py-8 shadow-romantic animate-fade-up" style={{ animationDelay: "0.9s" }}>
@@ -108,7 +110,7 @@ const wishes = [
   "May this year bring the day we finally close the distance between us.",
   "May you always know — even from miles away — that you are deeply, ridiculously, endlessly loved.",
   "May your laugh stay as loud, your smile as bright, and your heart as soft as the day I fell for you.",
-  "May 11/05 always be the most beautiful day of the year, because it's the day the world got Amal.",
+  "May 11/05 always be the most beautiful day of the year, kola nhar a Amal — because it's the day the world got you.",
 ];
 
 function BirthdayWish() {
@@ -237,8 +239,8 @@ function Reasons() {
   return (
     <section className="relative px-6 py-24">
       <div className="max-w-5xl mx-auto text-center">
-        <h2 className="text-4xl md:text-6xl font-display text-deep">9 reasons</h2>
-        <p className="mt-3 font-script text-2xl text-rose">tap each card to reveal 💝</p>
+        <h2 className="text-4xl md:text-6xl font-display text-deep">9 reasons <span className="text-rose">out of infinite</span></h2>
+        <p className="mt-3 font-script text-2xl text-rose">tap each card to reveal — wlh kayn bzaf 💝</p>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {reasons.map((r, i) => {
             const isOpen = revealed.has(i);
@@ -438,6 +440,222 @@ function HeartCatchGame() {
   );
 }
 
+// ---------- LOVE WHEEL ----------
+const wheelSlices = [
+  "A long warm hug 🤗",
+  "Forehead kiss 😘",
+  "Late-night call all night 🌙",
+  "I'll cook for you 🍝",
+  "A surprise voice note 🎙️",
+  "Movie night, your pick 🎬",
+  "I owe you flowers 🌹",
+  "Kanbghik bzaf, ya Amal 💗",
+];
+
+function LoveWheel() {
+  const [angle, setAngle] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  const spin = () => {
+    if (spinning) return;
+    setResult(null);
+    setSpinning(true);
+    const slice = Math.floor(Math.random() * wheelSlices.length);
+    const target = 360 * 6 + (360 - (slice * (360 / wheelSlices.length)) - 360 / wheelSlices.length / 2);
+    setAngle((a) => a + target);
+    setTimeout(() => {
+      setSpinning(false);
+      setResult(wheelSlices[slice]);
+    }, 4200);
+  };
+
+  const seg = 360 / wheelSlices.length;
+  const colors = ["var(--rose)", "var(--gold)", "var(--blush)", "var(--deep)"];
+
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <h2 className="text-4xl md:text-6xl font-display text-deep">Wheel of love 🎡</h2>
+      <p className="mt-3 font-script text-2xl text-rose">spin to see what Yasser owes you today</p>
+
+      <div className="mt-12 mx-auto relative w-[300px] h-[300px]">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-4xl z-10">▼</div>
+        <div
+          className="w-full h-full rounded-full shadow-romantic border-4 border-card"
+          style={{
+            transform: `rotate(${angle}deg)`,
+            transition: "transform 4s cubic-bezier(.17,.67,.2,1)",
+            background: `conic-gradient(${wheelSlices
+              .map((_, i) => `${colors[i % colors.length]} ${i * seg}deg ${(i + 1) * seg}deg`)
+              .join(", ")})`,
+          }}
+        >
+          {wheelSlices.map((_, i) => (
+            <div
+              key={i}
+              className="absolute left-1/2 top-1/2 origin-left text-xs text-card font-display"
+              style={{ transform: `rotate(${i * seg + seg / 2}deg) translateX(40px)` }}
+            >
+              💗
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={spin}
+          disabled={spinning}
+          className="absolute inset-0 m-auto h-20 w-20 rounded-full bg-card text-deep font-display text-sm shadow-romantic border-4 border-rose disabled:opacity-70"
+        >
+          {spinning ? "..." : "SPIN"}
+        </button>
+      </div>
+
+      {result && (
+        <p className="mt-8 font-display text-2xl md:text-3xl text-deep italic animate-fade-up">
+          ↳ {result}
+        </p>
+      )}
+    </section>
+  );
+}
+
+// ---------- MEMORY MATCH ----------
+const memoryEmojis = ["💗", "🌹", "🌙", "✨", "🎂", "💌"];
+
+type Card = { id: number; emoji: string; flipped: boolean; matched: boolean };
+
+function MemoryMatch() {
+  const [cards, setCards] = useState<Card[]>([]);
+  const [picked, setPicked] = useState<number[]>([]);
+  const [moves, setMoves] = useState(0);
+  const [won, setWon] = useState(false);
+
+  const reset = () => {
+    const deck = [...memoryEmojis, ...memoryEmojis]
+      .map((e, i) => ({ id: i, emoji: e, flipped: false, matched: false }))
+      .sort(() => Math.random() - 0.5)
+      .map((c, i) => ({ ...c, id: i }));
+    setCards(deck);
+    setPicked([]);
+    setMoves(0);
+    setWon(false);
+  };
+
+  useEffect(() => { reset(); }, []);
+
+  const flip = (id: number) => {
+    if (picked.length === 2) return;
+    setCards((cs) => cs.map((c) => (c.id === id && !c.matched ? { ...c, flipped: true } : c)));
+    const next = [...picked, id];
+    setPicked(next);
+    if (next.length === 2) {
+      setMoves((m) => m + 1);
+      setTimeout(() => {
+        setCards((cs) => {
+          const [a, b] = next;
+          const ca = cs.find((c) => c.id === a)!;
+          const cb = cs.find((c) => c.id === b)!;
+          const match = ca.emoji === cb.emoji;
+          const updated = cs.map((c) =>
+            c.id === a || c.id === b ? { ...c, matched: match, flipped: match } : c
+          );
+          if (updated.every((c) => c.matched)) setWon(true);
+          return updated;
+        });
+        setPicked([]);
+      }, 700);
+    }
+  };
+
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <h2 className="text-4xl md:text-6xl font-display text-deep">Memory of us 🧠💗</h2>
+      <p className="mt-3 font-script text-2xl text-rose">match the pairs — like we matched, hadchi mektab</p>
+      <p className="mt-2 text-sm text-muted-foreground">moves: {moves}</p>
+
+      <div className="mt-8 mx-auto grid grid-cols-4 gap-3 max-w-md">
+        {cards.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => !c.flipped && flip(c.id)}
+            className="aspect-square rounded-2xl border border-rose/30 bg-card/70 backdrop-blur shadow-sm text-3xl flex items-center justify-center transition-all"
+            style={{
+              transform: c.flipped ? "rotateY(0deg)" : "rotateY(180deg)",
+              background: c.matched ? "var(--gradient-romance)" : undefined,
+            }}
+          >
+            {c.flipped ? c.emoji : "💝"}
+          </button>
+        ))}
+      </div>
+
+      {won && (
+        <div className="mt-6 animate-fade-up">
+          <p className="font-display text-2xl text-deep">You won in {moves} moves 🎉</p>
+          <p className="font-script text-xl text-rose">…but you already won my heart in zero.</p>
+          <button onClick={reset} className="mt-3 rounded-full px-5 py-2 text-primary-foreground shadow-romantic" style={{ background: "var(--gradient-romance)" }}>
+            play again
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ---------- SECRET VAULT ----------
+function SecretVault() {
+  const [code, setCode] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
+  const [shake, setShake] = useState(false);
+
+  const tryUnlock = () => {
+    const c = code.trim().toLowerCase();
+    if (c === "amal" || c === "1105" || c === "11/05" || c === "yasser") {
+      setUnlocked(true);
+    } else {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
+  };
+
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <h2 className="text-4xl md:text-6xl font-display text-deep">The secret vault 🔐</h2>
+      <p className="mt-3 font-script text-2xl text-rose">hint: a name, or a date you'll never forget</p>
+
+      {!unlocked ? (
+        <div
+          className="mt-10 mx-auto flex flex-col sm:flex-row gap-3 justify-center max-w-md"
+          style={{ animation: shake ? "burst 0.5s ease" : undefined }}
+        >
+          <input
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && tryUnlock()}
+            placeholder="enter the secret…"
+            className="flex-1 rounded-full border border-rose/40 bg-card px-6 py-3 text-deep text-center font-display text-lg outline-none focus:border-rose"
+          />
+          <button
+            onClick={tryUnlock}
+            className="rounded-full px-8 py-3 text-primary-foreground shadow-romantic"
+            style={{ background: "var(--gradient-romance)" }}
+          >
+            unlock
+          </button>
+        </div>
+      ) : (
+        <div className="mt-10 mx-auto max-w-2xl rounded-3xl border border-gold/40 bg-card/80 backdrop-blur p-10 shadow-romantic animate-fade-up">
+          <p className="text-5xl">🗝️💗</p>
+          <p className="mt-4 font-display text-2xl md:text-3xl text-deep italic leading-relaxed">
+            "If anyone ever asks me what love feels like, I'll just say your name —
+            <span className="text-rose"> Amal</span> — and they'll understand everything."
+          </p>
+          <p className="mt-6 font-script text-xl text-rose">nti dyali, w ana dyalek. forever.</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function Letter() {
   const [open, setOpen] = useState(false);
   return (
@@ -467,7 +685,7 @@ function Letter() {
             Today is your day, my love. So blow out the candles and make a wish — but know that mine is already locked in:
             <br />a long, healthy, ridiculous life with you. Doctor Amal and her favorite patient, me. 🩺💗
             <br /><br />
-            Happy Birthday, Amal. I love you in every language I know, and a few I'm still inventing.
+            Happy Birthday, Amal. Kanbghik bzaf — I love you in every language I know, and a few I'm still inventing.
           </p>
           <p className="mt-6 font-script text-3xl text-rose">— Yasser</p>
         </div>
@@ -620,7 +838,10 @@ function Index() {
         <LoveQuestion />
         <Reasons />
         <HeartCatchGame />
+        <LoveWheel />
+        <MemoryMatch />
         <Timeline />
+        <SecretVault />
         <Letter />
         <FinalSurprise />
         <Footer />

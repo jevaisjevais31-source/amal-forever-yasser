@@ -1329,6 +1329,9 @@ function Index() {
         <Constellation />
         <OpenWhen />
         <HeartbeatSync />
+        <SweetsBox />
+        <KissJar />
+        <VirtualHug />
         <Timeline />
         <SecretVault />
         <Letter />

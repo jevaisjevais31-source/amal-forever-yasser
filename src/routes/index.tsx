@@ -1309,6 +1309,291 @@ function VirtualHug() {
 }
 
 
+// ───────── Piano For You ─────────
+const pianoKeys = [
+  { note: "C", freq: 261.63, word: "ana" },
+  { note: "D", freq: 293.66, word: "kanbghik" },
+  { note: "E", freq: 329.63, word: "bzaf" },
+  { note: "F", freq: 349.23, word: "ya" },
+  { note: "G", freq: 392.0, word: "Amal" },
+  { note: "A", freq: 440.0, word: "tanghitcham" },
+  { note: "B", freq: 493.88, word: "dima" },
+  { note: "C2", freq: 523.25, word: "💗" },
+];
+function PianoForYou() {
+  const ctxRef = useRef<AudioContext | null>(null);
+  const [active, setActive] = useState<number | null>(null);
+  const [trail, setTrail] = useState<string[]>([]);
+  const [playingSong, setPlayingSong] = useState(false);
+
+  const play = (i: number, freq: number, word: string, dur = 0.6) => {
+    if (typeof window === "undefined") return;
+    if (!ctxRef.current) ctxRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const ctx = ctxRef.current;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + dur);
+    setActive(i);
+    setTrail((t) => [...t.slice(-7), word]);
+    window.setTimeout(() => setActive((a) => (a === i ? null : a)), dur * 800);
+  };
+
+  const playOurSong = async () => {
+    if (playingSong) return;
+    setPlayingSong(true);
+    setTrail([]);
+    // melody: little romantic phrase
+    const seq = [0, 2, 4, 5, 4, 2, 0, 4, 5, 7, 5, 4, 2, 0];
+    for (const i of seq) {
+      play(i, pianoKeys[i].freq, pianoKeys[i].word, 0.45);
+      await new Promise((r) => setTimeout(r, 360));
+    }
+    setPlayingSong(false);
+  };
+
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <p className="font-script text-3xl text-rose">since you love the keys</p>
+      <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">a piano for your fingers 🎹</h2>
+      <p className="mt-3 text-muted-foreground">tap a key — every note whispers a word from me. then press <em>play our song</em>.</p>
+
+      <div className="mt-12 mx-auto max-w-3xl rounded-3xl border border-rose/20 bg-card/80 backdrop-blur p-6 shadow-romantic">
+        <div className="relative flex justify-center gap-1 select-none">
+          {pianoKeys.map((k, i) => (
+            <button
+              key={k.note}
+              onClick={() => play(i, k.freq, k.word)}
+              className={`relative h-44 md:h-56 w-10 md:w-14 rounded-b-xl border border-deep/40 transition-all ${
+                active === i
+                  ? "bg-gradient-to-b from-rose to-gold scale-y-95 shadow-glow"
+                  : "bg-gradient-to-b from-white to-blush/30 hover:from-blush/40 hover:to-rose/30"
+              }`}
+            >
+              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] md:text-xs text-deep/70 font-semibold">{k.note}</span>
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={playOurSong}
+          disabled={playingSong}
+          className="mt-8 rounded-full px-6 py-3 text-primary-foreground shadow-romantic disabled:opacity-50"
+          style={{ background: "var(--gradient-romance)" }}
+        >
+          {playingSong ? "playing for you… 🎶" : "▶ play our little song"}
+        </button>
+
+        {trail.length > 0 && (
+          <p className="mt-6 font-script text-2xl md:text-3xl text-rose min-h-[2.5rem] animate-fade-up">
+            {trail.join(" · ")}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ───────── Court Of Love (basket + volley) ─────────
+const courtMessages = [
+  "swish! that's how my heart drops every time I see you 🏀",
+  "spike! you are unstoppable, ya Amal 🏐",
+  "two points — and one whole heart, mine 💗",
+  "MVP of my life. no contest.",
+  "you shoot, you score, you steal hearts (mostly mine).",
+  "if loving you was a sport, I'd be in the hall of fame.",
+  "ace! game, set, Amal.",
+  "pass me the ball, I'll pass you the world.",
+];
+type Ball = { id: number; emoji: string; x: number; y: number; scored: boolean };
+function CourtOfLove() {
+  const [balls, setBalls] = useState<Ball[]>([]);
+  const [score, setScore] = useState(0);
+  const [misses, setMisses] = useState(0);
+  const [msg, setMsg] = useState<string | null>(null);
+  const idRef = useRef(0);
+  const [mode, setMode] = useState<"🏀" | "🏐">("🏀");
+  const courtRef = useRef<HTMLDivElement>(null);
+
+  const shoot = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = courtRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const hoopX = rect.width / 2;
+    const hoopY = 60;
+    const dist = Math.hypot(x - hoopX, y - hoopY);
+    const scored = dist < 70;
+    const id = idRef.current++;
+    setBalls((b) => [...b, { id, emoji: mode, x, y, scored }]);
+    if (scored) {
+      setScore((s) => s + 1);
+      setMsg(courtMessages[Math.floor(Math.random() * courtMessages.length)]);
+    } else {
+      setMisses((m) => m + 1);
+    }
+    setMode((m) => (m === "🏀" ? "🏐" : "🏀"));
+    window.setTimeout(() => setBalls((b) => b.filter((bb) => bb.id !== id)), 1200);
+  };
+
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <p className="font-script text-3xl text-rose">for my athlete</p>
+      <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">court of love 🏀🏐</h2>
+      <p className="mt-3 text-muted-foreground">tap anywhere on the court. aim for the hoop. each swish = a tiny love note.</p>
+
+      <div
+        ref={courtRef}
+        onClick={shoot}
+        className="relative mt-10 mx-auto max-w-2xl h-[420px] rounded-3xl overflow-hidden cursor-crosshair shadow-romantic border-4 border-gold/40"
+        style={{ background: "linear-gradient(180deg, oklch(0.7 0.13 30) 0%, oklch(0.82 0.09 60) 60%, oklch(0.6 0.12 35) 100%)" }}
+      >
+        {/* hoop */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-2 flex flex-col items-center">
+          <div className="w-1 h-6 bg-deep/80" />
+          <div className="w-24 h-3 rounded-sm bg-deep/90" />
+          <div className="w-20 h-10 border-x-4 border-b-4 border-rose rounded-b-xl" style={{ borderColor: "oklch(0.65 0.22 25)" }} />
+        </div>
+        {/* court line */}
+        <div className="absolute bottom-12 left-0 right-0 h-px bg-white/40" />
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-deep/10" />
+
+        {balls.map((b) => (
+          <span
+            key={b.id}
+            className="absolute text-3xl pointer-events-none"
+            style={{
+              left: b.x,
+              top: b.y,
+              transform: "translate(-50%, -50%)",
+              animation: `${b.scored ? "star-grow" : "burst"} 1.1s ease-out forwards`,
+              ["--tx" as string]: `${(60 - b.x) * 0.6}px`,
+              ["--ty" as string]: `${(60 - b.y) * 0.6}px`,
+              ["--bx" as string]: "0px",
+              ["--by" as string]: "60px",
+              ["--br" as string]: "180deg",
+            } as React.CSSProperties}
+          >
+            {b.emoji}
+          </span>
+        ))}
+
+        <div className="absolute top-3 left-3 rounded-full bg-card/90 px-4 py-1 text-sm font-semibold text-deep shadow">
+          🏀 {score} · ❌ {misses}
+        </div>
+        <div className="absolute top-3 right-3 rounded-full bg-card/90 px-4 py-1 text-sm font-semibold text-rose shadow">
+          next: {mode}
+        </div>
+      </div>
+
+      {msg && (
+        <p key={msg + score} className="mt-6 font-display italic text-xl md:text-2xl text-deep animate-fade-up max-w-xl mx-auto">
+          “{msg}”
+        </p>
+      )}
+    </section>
+  );
+}
+
+// ───────── Beach Escape ─────────
+const beachWhispers = [
+  "tanghitcham, ya hayati 🌊",
+  "one day soon — same sand, same sun, same hand in mine.",
+  "I packed the ocean into this bottle just for you.",
+  "kanbghik bzaf. every wave knows it now.",
+  "close your eyes — that's me, beside you on the towel.",
+  "we'll race to the water and you'll win on purpose for me 😉",
+];
+function BeachEscape() {
+  const [items, setItems] = useState<{ id: number; x: number; y: number; emoji: string }[]>([]);
+  const [bottle, setBottle] = useState<string | null>(null);
+  const idRef = useRef(0);
+  const beachRef = useRef<HTMLDivElement>(null);
+  const sands = ["🐚", "⭐", "🌟", "🦀", "🌺", "🐠"];
+
+  const drop = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = beachRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = idRef.current++;
+    setItems((s) => [...s, { id, x, y, emoji: sands[Math.floor(Math.random() * sands.length)] }]);
+  };
+
+  const openBottle = () => {
+    setBottle(beachWhispers[Math.floor(Math.random() * beachWhispers.length)]);
+  };
+
+  const clearBeach = () => {
+    setItems([]);
+    setBottle(null);
+  };
+
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <p className="font-script text-3xl text-rose">since you love the beach</p>
+      <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">our private beach 🏖️</h2>
+      <p className="mt-3 text-muted-foreground">tap the sand to drop shells & stars. then open the bottle…</p>
+
+      <div
+        ref={beachRef}
+        onClick={drop}
+        className="relative mt-10 mx-auto max-w-3xl h-[360px] rounded-3xl overflow-hidden cursor-pointer shadow-romantic border-4 border-blush/50"
+        style={{
+          background:
+            "linear-gradient(180deg, oklch(0.85 0.10 230) 0%, oklch(0.78 0.12 220) 35%, oklch(0.72 0.14 215) 55%, oklch(0.92 0.06 80) 70%, oklch(0.88 0.10 70) 100%)",
+        }}
+      >
+        {/* sun */}
+        <div className="absolute top-6 right-10 w-16 h-16 rounded-full" style={{ background: "radial-gradient(circle, oklch(0.95 0.15 85), oklch(0.85 0.18 65))", boxShadow: "0 0 60px oklch(0.9 0.15 80 / 0.7)" }} />
+        {/* waves */}
+        <div className="absolute left-0 right-0 top-[55%] h-[8%] bg-white/30 rounded-full blur-md" />
+        <div className="absolute left-0 right-0 top-[60%] h-[6%] bg-white/40 rounded-full blur-sm" />
+        {/* bottle */}
+        <button
+          onClick={(e) => { e.stopPropagation(); openBottle(); }}
+          className="absolute bottom-4 left-6 text-4xl hover:scale-125 transition-transform"
+          title="open the bottle"
+        >
+          🍾
+        </button>
+        {/* palm */}
+        <div className="absolute bottom-2 right-4 text-5xl">🌴</div>
+
+        {items.map((it) => (
+          <span key={it.id} className="absolute text-2xl pointer-events-none animate-fade-up" style={{ left: it.x, top: it.y, transform: "translate(-50%,-50%)" }}>
+            {it.emoji}
+          </span>
+        ))}
+
+        <div className="absolute top-3 left-3 rounded-full bg-card/90 px-3 py-1 text-xs text-deep shadow">
+          {items.length} treasures
+        </div>
+      </div>
+
+      {bottle && (
+        <div key={bottle + items.length} className="mt-6 mx-auto max-w-xl rounded-3xl border border-rose/30 bg-card/90 backdrop-blur p-6 shadow-romantic animate-fade-up">
+          <p className="text-3xl">📜</p>
+          <p className="mt-2 font-display italic text-xl md:text-2xl text-deep">{bottle}</p>
+          <p className="mt-2 text-xs uppercase tracking-[0.3em] text-gold">— Yasser</p>
+        </div>
+      )}
+
+      {items.length > 0 && (
+        <button onClick={clearBeach} className="mt-4 text-xs uppercase tracking-widest text-muted-foreground hover:text-rose">
+          smooth the sand again
+        </button>
+      )}
+    </section>
+  );
+}
+
 function Index() {
   return (
     <main

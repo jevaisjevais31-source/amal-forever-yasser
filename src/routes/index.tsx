@@ -10,11 +10,17 @@ const ANCHOR_DATE = new Date("2026-05-11T00:00:00");
 const ANCHOR_DAYS = 32;
 
 function useTogether() {
-  const [now, setNow] = useState(() => Date.now());
+  const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState(() => ANCHOR_DATE.getTime());
   useEffect(() => {
+    setMounted(true);
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 50);
     return () => clearInterval(id);
   }, []);
+  if (!mounted) {
+    return { days: ANCHOR_DAYS, hours: 0, minutes: 0, seconds: 0, ms: 0, mounted: false };
+  }
   const diffMs = now - ANCHOR_DATE.getTime();
   const totalMs = ANCHOR_DAYS * 86400000 + diffMs;
   const totalSec = Math.max(ANCHOR_DAYS * 86400, totalMs / 1000);
@@ -23,7 +29,7 @@ function useTogether() {
   const minutes = Math.floor((totalSec % 3600) / 60);
   const seconds = Math.floor(totalSec % 60);
   const ms = Math.floor((totalSec * 1000) % 1000);
-  return { days, hours, minutes, seconds, ms };
+  return { days, hours, minutes, seconds, ms, mounted: true };
 }
 
 function FloatingHearts() {
@@ -815,6 +821,188 @@ function FinalSurprise() {
   );
 }
 
+// ───────── Music Player (M3ak — Manal) ─────────
+function MusicPlayer() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [ready, setReady] = useState(true);
+  const toggle = async () => {
+    const a = audioRef.current;
+    if (!a) return;
+    try {
+      if (playing) { a.pause(); setPlaying(false); }
+      else { await a.play(); setPlaying(true); }
+    } catch { setReady(false); }
+  };
+  return (
+    <>
+      <audio ref={audioRef} src="/music.mp3" loop preload="auto" onEnded={() => setPlaying(false)} />
+      <button
+        onClick={toggle}
+        className="fixed bottom-5 right-5 z-50 group flex items-center gap-2 rounded-full bg-card/90 backdrop-blur-md border border-rose/30 px-4 py-3 shadow-romantic hover:scale-105 transition-transform"
+        aria-label="toggle music"
+      >
+        <span className={`text-2xl ${playing ? "animate-heartbeat" : ""}`}>{playing ? "🎵" : "🎶"}</span>
+        <span className="font-script text-rose text-lg leading-none">
+          {ready ? (playing ? "M3ak — Manal" : "play our song") : "add /music.mp3"}
+        </span>
+      </button>
+    </>
+  );
+}
+
+// ───────── Love Note Generator ─────────
+const noteStarts = ["habibti", "ya hayati", "ya 9amar", "my Amal", "my whole world"];
+const noteMids = [
+  "you are the reason my mornings feel soft",
+  "I close my eyes and I still see you smiling",
+  "even the distance kanbghik bzaf",
+  "every song reminds me of your voice",
+  "you are my favourite plot twist",
+  "kola dakika bjiha, kantfekrek",
+  "you make ordinary days feel like poetry",
+];
+const noteEnds = ["forever yours, Y.", "till the stars run out 🌙", "kola nhar a Amal 💞", "wlh ana dyalek 💗", "and a thousand more lifetimes."];
+function LoveNotes() {
+  const [note, setNote] = useState<string | null>(null);
+  const generate = () => {
+    const a = noteStarts[Math.floor(Math.random() * noteStarts.length)];
+    const b = noteMids[Math.floor(Math.random() * noteMids.length)];
+    const c = noteEnds[Math.floor(Math.random() * noteEnds.length)];
+    setNote(`${a},\n${b}.\n${c}`);
+  };
+  return (
+    <section className="relative px-6 py-24">
+      <div className="max-w-2xl mx-auto text-center">
+        <p className="font-script text-3xl text-rose">a love note generator</p>
+        <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">infinite tiny letters</h2>
+        <p className="mt-3 text-muted-foreground">tap the envelope — a new one for every mood, ya hayati</p>
+        <button
+          onClick={generate}
+          className="mt-10 text-7xl md:text-8xl hover:scale-110 active:scale-95 transition-transform"
+          aria-label="new note"
+        >
+          💌
+        </button>
+        {note && (
+          <div key={note} className="mt-10 mx-auto max-w-md rounded-3xl border border-rose/20 bg-card/80 backdrop-blur-md p-8 shadow-romantic animate-fade-up">
+            <p className="font-display italic text-xl md:text-2xl text-deep whitespace-pre-line leading-relaxed">{note}</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ───────── Constellation (click sky to draw stars) ─────────
+function Constellation() {
+  const [stars, setStars] = useState<{ id: number; x: number; y: number }[]>([]);
+  const idRef = useRef(0);
+  const add = (e: React.MouseEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * 100;
+    const y = ((e.clientY - r.top) / r.height) * 100;
+    setStars((s) => [...s, { id: idRef.current++, x, y }]);
+  };
+  const reset = () => setStars([]);
+  const points = stars.map((s) => `${s.x},${s.y}`).join(" ");
+  return (
+    <section className="relative px-6 py-24">
+      <div className="max-w-3xl mx-auto text-center">
+        <p className="font-script text-3xl text-rose">our private sky</p>
+        <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">draw a constellation for us</h2>
+        <p className="mt-3 text-muted-foreground">click anywhere on the sky — every star is a memory ✨</p>
+        <div
+          onClick={add}
+          className="relative mt-10 h-[60vh] w-full rounded-3xl overflow-hidden cursor-crosshair border border-rose/20 shadow-romantic"
+          style={{ background: "radial-gradient(ellipse at center, oklch(0.18 0.08 280) 0%, oklch(0.08 0.05 270) 100%)" }}
+        >
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {stars.length > 1 && (
+              <polyline points={points} fill="none" stroke="oklch(0.85 0.13 75)" strokeWidth="0.25" strokeDasharray="0.6 0.6" opacity="0.7" />
+            )}
+          </svg>
+          {stars.map((s) => (
+            <span
+              key={s.id}
+              className="absolute -translate-x-1/2 -translate-y-1/2 text-2xl animate-sparkle"
+              style={{ left: `${s.x}%`, top: `${s.y}%` }}
+            >✨</span>
+          ))}
+          {stars.length === 0 && (
+            <p className="absolute inset-0 flex items-center justify-center font-script text-3xl text-blush/60">tap the sky, habibti</p>
+          )}
+        </div>
+        <div className="mt-4 flex items-center justify-center gap-4 text-sm text-muted-foreground">
+          <span>{stars.length} stars · {Math.max(0, stars.length - 1)} lines drawn</span>
+          {stars.length > 0 && (
+            <button onClick={reset} className="underline hover:text-rose">reset sky</button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ───────── Compliment Slot Machine ─────────
+const slot1 = ["smart", "kind", "funny", "soft", "fierce", "magic", "rare", "warm"];
+const slot2 = ["doctor", "dreamer", "queen", "muse", "sunshine", "trouble", "miracle", "9amar"];
+const slot3 = ["💗", "🌙", "✨", "🌹", "🩺", "💞", "🍓", "👑"];
+function SlotMachine() {
+  const [reels, setReels] = useState<[string, string, string]>([slot1[0], slot2[0], slot3[0]]);
+  const [spinning, setSpinning] = useState(false);
+  const [count, setCount] = useState(0);
+  const spin = () => {
+    if (spinning) return;
+    setSpinning(true);
+    let ticks = 0;
+    const id = setInterval(() => {
+      setReels([
+        slot1[Math.floor(Math.random() * slot1.length)],
+        slot2[Math.floor(Math.random() * slot2.length)],
+        slot3[Math.floor(Math.random() * slot3.length)],
+      ]);
+      ticks++;
+      if (ticks > 18) {
+        clearInterval(id);
+        setSpinning(false);
+        setCount((c) => c + 1);
+      }
+    }, 70);
+  };
+  return (
+    <section className="relative px-6 py-24">
+      <div className="max-w-2xl mx-auto text-center">
+        <p className="font-script text-3xl text-rose">compliment slot machine</p>
+        <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">three reels, infinite truths</h2>
+        <p className="mt-3 text-muted-foreground">because one compliment is never enough for you</p>
+        <div className="mt-10 inline-flex gap-3 md:gap-5 rounded-3xl border border-gold/40 bg-card/80 backdrop-blur-md px-6 py-8 shadow-romantic">
+          {reels.map((r, i) => (
+            <div
+              key={i}
+              className="min-w-[110px] md:min-w-[150px] h-24 md:h-28 flex items-center justify-center rounded-2xl bg-gradient-to-b from-blush/40 to-rose/20 border border-rose/30"
+            >
+              <span className={`font-display text-2xl md:text-4xl text-deep ${spinning ? "blur-[1px]" : ""}`}>{r}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6">
+          <button
+            onClick={spin}
+            disabled={spinning}
+            className="rounded-full bg-gradient-to-r from-rose to-deep text-primary-foreground font-display text-lg px-8 py-3 shadow-romantic hover:scale-105 active:scale-95 transition-transform disabled:opacity-60"
+          >
+            {spinning ? "spinning…" : "spin for me 🎰"}
+          </button>
+        </div>
+        {count > 0 && !spinning && (
+          <p className="mt-6 font-script text-2xl text-rose">you are {reels[0]} {reels[1]} {reels[2]} — and that's {count}× confirmed</p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
     <footer className="relative px-6 py-16 text-center">
@@ -832,14 +1020,18 @@ function Index() {
       style={{ background: "radial-gradient(ellipse at top, oklch(0.95 0.05 15) 0%, oklch(0.985 0.012 20) 50%, oklch(0.92 0.06 25) 100%)" }}
     >
       <FloatingHearts />
+      <MusicPlayer />
       <div className="relative z-10">
         <Hero />
         <BirthdayWish />
         <LoveQuestion />
         <Reasons />
+        <LoveNotes />
         <HeartCatchGame />
+        <SlotMachine />
         <LoveWheel />
         <MemoryMatch />
+        <Constellation />
         <Timeline />
         <SecretVault />
         <Letter />

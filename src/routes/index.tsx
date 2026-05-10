@@ -1104,6 +1104,211 @@ function Footer() {
   );
 }
 
+// ───────── Sweets Box (chocolates + ice cream) ─────────
+const sweets = [
+  { emoji: "🍫", name: "dark chocolate", msg: "the deep kind of love. the kind that doesn't melt. that's us, ya hayati." },
+  { emoji: "🍓", name: "strawberry truffle", msg: "remember the first time you laughed at my dumb joke? I knew right there. gone. done." },
+  { emoji: "🍦", name: "vanilla scoop", msg: "soft, simple, my favourite — just like the way you say 'salam habibi' in the morning." },
+  { emoji: "🍨", name: "double scoop", msg: "one for me, one for you. nta ki dert, ana ki dert. always splitting everything." },
+  { emoji: "🍬", name: "caramel bonbon", msg: "sticky sweet — like the way you stay in my head all day. bzaaaaaf." },
+  { emoji: "🧁", name: "tiny cupcake", msg: "small treat, big love. happy birthday again, ya 9amar 🎂" },
+  { emoji: "🍡", name: "three on a stick", msg: "past, present, future. all three taste like you." },
+  { emoji: "🍩", name: "donut hole", msg: "the only hole in my life is the shape of you when you're not here. fill it soon, please." },
+  { emoji: "🥮", name: "secret filling", msg: "wlh I was scared to fall this hard. and I'd do it again. and again. and again." },
+];
+function SweetsBox() {
+  const [eaten, setEaten] = useState<Set<number>>(new Set());
+  const [picked, setPicked] = useState<number | null>(null);
+  const eat = (i: number) => { setEaten((s) => new Set(s).add(i)); setPicked(i); };
+  const reset = () => { setEaten(new Set()); setPicked(null); };
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <p className="font-script text-3xl text-rose">a box just for you</p>
+      <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">chocolate & ice cream box 🍫🍦</h2>
+      <p className="mt-3 text-muted-foreground">pick a sweet — taste a tiny secret. (no calories, only love.)</p>
+
+      <div className="mt-12 mx-auto max-w-2xl rounded-3xl border-4 border-gold/50 bg-card/80 backdrop-blur p-6 shadow-romantic"
+        style={{ background: "linear-gradient(135deg, oklch(0.96 0.04 30), oklch(0.92 0.06 20))" }}>
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
+          {sweets.map((s, i) => {
+            const gone = eaten.has(i);
+            return (
+              <button
+                key={i}
+                onClick={() => !gone && eat(i)}
+                disabled={gone}
+                className="aspect-square rounded-2xl border border-rose/30 bg-card/90 flex flex-col items-center justify-center gap-1 shadow-sm hover:scale-105 active:scale-95 transition-all disabled:opacity-30"
+              >
+                <span className="text-4xl md:text-5xl">{gone ? "💗" : s.emoji}</span>
+                <span className="text-[10px] md:text-xs text-muted-foreground">{gone ? "eaten" : s.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {picked !== null && (
+        <div key={picked} className="mt-8 mx-auto max-w-xl rounded-3xl border border-rose/30 bg-card/90 backdrop-blur p-8 shadow-romantic animate-fade-up">
+          <p className="text-5xl">{sweets[picked].emoji}</p>
+          <p className="mt-2 text-xs uppercase tracking-[0.3em] text-gold">{sweets[picked].name}</p>
+          <p className="mt-3 font-display italic text-xl md:text-2xl text-deep leading-snug">{sweets[picked].msg}</p>
+        </div>
+      )}
+
+      {eaten.size === sweets.length && (
+        <button onClick={reset} className="mt-8 rounded-full px-6 py-3 text-primary-foreground shadow-romantic" style={{ background: "var(--gradient-romance)" }}>
+          refill the box 🍫
+        </button>
+      )}
+    </section>
+  );
+}
+
+// ───────── Kiss Jar ─────────
+type Kiss = { id: number; left: number };
+function KissJar() {
+  const [count, setCount] = useState(0);
+  const [flying, setFlying] = useState<Kiss[]>([]);
+  const idRef = useRef(0);
+  const blow = () => {
+    const id = idRef.current++;
+    setFlying((f) => [...f, { id, left: 30 + Math.random() * 40 }]);
+    setTimeout(() => {
+      setFlying((f) => f.filter((k) => k.id !== id));
+      setCount((c) => c + 1);
+    }, 1400);
+  };
+  const fillPct = Math.min(100, (count / 100) * 100);
+  const overflow = count >= 100;
+  return (
+    <section className="relative px-6 py-24 text-center overflow-hidden">
+      <p className="font-script text-3xl text-rose">a jar just for us</p>
+      <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">the kiss jar 💋</h2>
+      <p className="mt-3 text-muted-foreground">blow a kiss — watch it fly into the jar. fill it to 100, ya hayati.</p>
+
+      <div className="mt-10 mx-auto relative w-72 h-80">
+        {/* jar */}
+        <div className="absolute inset-x-6 top-6 bottom-0 rounded-b-[40px] rounded-t-2xl border-4 border-rose/40 bg-card/40 backdrop-blur overflow-hidden shadow-romantic">
+          <div
+            className="absolute bottom-0 left-0 right-0 transition-all duration-700"
+            style={{
+              height: `${fillPct}%`,
+              background: "linear-gradient(180deg, oklch(0.85 0.13 15 / 0.85), oklch(0.7 0.18 10 / 0.95))",
+            }}
+          >
+            <div className="flex flex-wrap-reverse gap-1 p-2 justify-center">
+              {Array.from({ length: Math.min(count, 100) }).map((_, i) => (
+                <span key={i} className="text-lg">💋</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* lid */}
+        <div className="absolute top-0 inset-x-3 h-10 rounded-t-2xl bg-gold/80 border-4 border-gold shadow-md" />
+        {/* counter */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="font-display text-5xl text-card drop-shadow-md">{count}</span>
+        </div>
+        {/* flying kisses */}
+        {flying.map((k) => (
+          <span
+            key={k.id}
+            className="absolute text-3xl pointer-events-none"
+            style={{
+              left: `${k.left}%`,
+              bottom: 0,
+              animation: "heart-explode 1.4s ease-out forwards",
+              ["--tx" as string]: `${(Math.random() - 0.5) * 60}px`,
+              ["--ty" as string]: "-260px",
+              ["--rot" as string]: `${(Math.random() - 0.5) * 180}deg`,
+            }}
+          >💋</span>
+        ))}
+      </div>
+
+      <button
+        onClick={blow}
+        className="mt-8 rounded-full px-10 py-5 text-lg font-medium text-primary-foreground shadow-romantic hover:scale-105 active:scale-95 transition-transform"
+        style={{ background: "var(--gradient-romance)" }}
+      >
+        blow a kiss 💋
+      </button>
+
+      {overflow && (
+        <p className="mt-6 font-script text-2xl md:text-3xl text-rose animate-fade-up max-w-xl mx-auto">
+          jar full, ya Amal. 100 kisses delivered — and there's a lifetime more where those came from. 💞
+        </p>
+      )}
+    </section>
+  );
+}
+
+// ───────── Virtual Cuddle (hold to hug) ─────────
+function VirtualHug() {
+  const [hugging, setHugging] = useState(false);
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    if (!hugging) return;
+    const id = setInterval(() => setTotal((t) => t + 0.1), 100);
+    return () => clearInterval(id);
+  }, [hugging]);
+  const start = () => setHugging(true);
+  const stop = () => setHugging(false);
+  const minutes = Math.floor(total / 60);
+  const sec = (total % 60).toFixed(1);
+  return (
+    <section className="relative px-6 py-24 text-center overflow-hidden">
+      <p className="font-script text-3xl text-rose">a hug across the map</p>
+      <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">virtual cuddle 🫂</h2>
+      <p className="mt-3 text-muted-foreground">press and hold — feel the squeeze, ya hayati. let go when you're ready (don't).</p>
+
+      <div className="mt-12 mx-auto relative w-72 h-72 select-none">
+        {/* warm aura */}
+        <div
+          className="absolute inset-0 rounded-full transition-all duration-500"
+          style={{
+            background: "radial-gradient(circle, oklch(0.85 0.13 15 / 0.7) 0%, transparent 70%)",
+            transform: hugging ? "scale(1.4)" : "scale(1)",
+            opacity: hugging ? 1 : 0.5,
+            filter: `blur(${hugging ? 20 : 8}px)`,
+          }}
+        />
+        {/* arms */}
+        <span
+          className="absolute left-0 top-1/2 -translate-y-1/2 text-7xl transition-all duration-500"
+          style={{ transform: `translateY(-50%) translateX(${hugging ? "60px" : "0"}) rotate(${hugging ? 25 : -20}deg)` }}
+        >🫶</span>
+        <span
+          className="absolute right-0 top-1/2 -translate-y-1/2 text-7xl transition-all duration-500 scale-x-[-1]"
+          style={{ transform: `translateY(-50%) translateX(${hugging ? "-60px" : "0"}) scaleX(-1) rotate(${hugging ? 25 : -20}deg)` }}
+        >🫶</span>
+        {/* heart center */}
+        <button
+          onMouseDown={start}
+          onMouseUp={stop}
+          onMouseLeave={stop}
+          onTouchStart={start}
+          onTouchEnd={stop}
+          className="absolute inset-0 m-auto h-32 w-32 rounded-full text-7xl flex items-center justify-center"
+          style={{ animation: hugging ? "heartbeat 0.7s ease-in-out infinite" : "heartbeat 1.6s ease-in-out infinite" }}
+          aria-label="hold to hug"
+        >💗</button>
+      </div>
+
+      <p className="mt-8 font-display text-xl text-deep">total cuddle time: <span className="text-rose">{minutes}m {sec}s</span></p>
+      {total > 10 && !hugging && (
+        <p className="mt-3 font-script text-2xl text-rose animate-fade-up max-w-md mx-auto">
+          {total > 60 ? "wlh that was a real one. felt it from here 🫂" : "okay that was nice, hold longer next time 😤💗"}
+        </p>
+      )}
+      {hugging && (
+        <p className="mt-3 font-script text-xl text-blush animate-fade-up">…squeezing you tight, kanbghik bzaf…</p>
+      )}
+    </section>
+  );
+}
+
+
 function Index() {
   return (
     <main

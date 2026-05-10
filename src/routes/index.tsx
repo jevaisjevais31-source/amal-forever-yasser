@@ -110,7 +110,7 @@ const wishes = [
   "May this year bring the day we finally close the distance between us.",
   "May you always know — even from miles away — that you are deeply, ridiculously, endlessly loved.",
   "May your laugh stay as loud, your smile as bright, and your heart as soft as the day I fell for you.",
-  "May 11/05 always be the most beautiful day of the year, because it's the day the world got Amal.",
+  "May 11/05 always be the most beautiful day of the year, kola nhar a Amal — because it's the day the world got you.",
 ];
 
 function BirthdayWish() {

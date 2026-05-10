@@ -1617,6 +1617,9 @@ function Index() {
         <SweetsBox />
         <KissJar />
         <VirtualHug />
+        <PianoForYou />
+        <CourtOfLove />
+        <BeachEscape />
         <Timeline />
         <SecretVault />
         <Letter />

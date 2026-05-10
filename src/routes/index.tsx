@@ -239,8 +239,8 @@ function Reasons() {
   return (
     <section className="relative px-6 py-24">
       <div className="max-w-5xl mx-auto text-center">
-        <h2 className="text-4xl md:text-6xl font-display text-deep">9 reasons</h2>
-        <p className="mt-3 font-script text-2xl text-rose">tap each card to reveal 💝</p>
+        <h2 className="text-4xl md:text-6xl font-display text-deep">9 reasons <span className="text-rose">out of infinite</span></h2>
+        <p className="mt-3 font-script text-2xl text-rose">tap each card to reveal — wlh kayn bzaf 💝</p>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {reasons.map((r, i) => {
             const isOpen = revealed.has(i);

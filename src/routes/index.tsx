@@ -72,12 +72,12 @@ function Hero() {
   ];
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <p className="font-script text-2xl md:text-3xl text-rose animate-fade-up">to my dearest</p>
+      <p className="font-script text-2xl md:text-3xl text-rose animate-fade-up">to my dearest habibti</p>
       <h1 className="mt-2 text-7xl md:text-9xl font-display font-semibold text-shimmer animate-fade-up" style={{ animationDelay: "0.2s" }}>
         Amal
       </h1>
       <p className="mt-6 text-xl md:text-2xl font-display italic text-deep animate-fade-up" style={{ animationDelay: "0.5s" }}>
-        Happy Birthday, my love · 11 / 05
+        Happy Birthday, ya hayati · 11 / 05
       </p>
 
       <div className="mt-14 rounded-3xl border border-rose/20 bg-card/70 backdrop-blur-md px-6 md:px-12 py-8 shadow-romantic animate-fade-up" style={{ animationDelay: "0.9s" }}>

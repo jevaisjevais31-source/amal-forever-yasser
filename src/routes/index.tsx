@@ -821,36 +821,6 @@ function FinalSurprise() {
   );
 }
 
-// ───────── Music Player (M3ak — Manal) ─────────
-function MusicPlayer() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [ready, setReady] = useState(true);
-  const toggle = async () => {
-    const a = audioRef.current;
-    if (!a) return;
-    try {
-      if (playing) { a.pause(); setPlaying(false); }
-      else { await a.play(); setPlaying(true); }
-    } catch { setReady(false); }
-  };
-  return (
-    <>
-      <audio ref={audioRef} src="/music.mp3" loop preload="auto" onEnded={() => setPlaying(false)} />
-      <button
-        onClick={toggle}
-        className="fixed bottom-5 right-5 z-50 group flex items-center gap-2 rounded-full bg-card/90 backdrop-blur-md border border-rose/30 px-4 py-3 shadow-romantic hover:scale-105 transition-transform"
-        aria-label="toggle music"
-      >
-        <span className={`text-2xl ${playing ? "animate-heartbeat" : ""}`}>{playing ? "🎵" : "🎶"}</span>
-        <span className="font-script text-rose text-lg leading-none">
-          {ready ? (playing ? "M3ak — Manal" : "play our song") : "add /music.mp3"}
-        </span>
-      </button>
-    </>
-  );
-}
-
 // ───────── Love Note Generator ─────────
 const noteStarts = ["habibti", "ya hayati", "ya 9amar", "my Amal", "my whole world"];
 const noteMids = [
@@ -894,7 +864,27 @@ function LoveNotes() {
   );
 }
 
-// ───────── Constellation (click sky to draw stars) ─────────
+// ───────── Constellation (click sky to draw stars + reading) ─────────
+const constellationNames = [
+  { name: "The Spark", meaning: "the very first second I knew. small but eternal." },
+  { name: "The Bridge", meaning: "two hearts, one straight line — distance means nothing." },
+  { name: "The Triangle of Forever", meaning: "you, me, and the love between us. unbreakable." },
+  { name: "The Crown of Amal", meaning: "four points for the queen you are. wear it well." },
+  { name: "The Open Heart", meaning: "five stars beating together — that's our rhythm." },
+  { name: "The Promise", meaning: "six stars, six lifetimes I'd choose you in." },
+  { name: "The Lucky Seven", meaning: "seven wonders of my world, all of them are you." },
+  { name: "The Infinity Knot", meaning: "tangled, beautiful, never-ending — like us." },
+  { name: "The Galaxy of Us", meaning: "you've drawn a whole universe. and I live in it." },
+];
+function readConstellation(n: number) {
+  if (n === 0) return null;
+  if (n <= 9) return constellationNames[n - 1];
+  return {
+    name: `The Cosmos of Us (${n} stars)`,
+    meaning: "wlh you've gone past the sky. this is no longer a constellation — it's a love story.",
+  };
+}
+
 function Constellation() {
   const [stars, setStars] = useState<{ id: number; x: number; y: number }[]>([]);
   const idRef = useRef(0);
@@ -906,6 +896,7 @@ function Constellation() {
   };
   const reset = () => setStars([]);
   const points = stars.map((s) => `${s.x},${s.y}`).join(" ");
+  const reading = readConstellation(stars.length);
   return (
     <section className="relative px-6 py-24">
       <div className="max-w-3xl mx-auto text-center">
@@ -939,6 +930,106 @@ function Constellation() {
             <button onClick={reset} className="underline hover:text-rose">reset sky</button>
           )}
         </div>
+        {reading && (
+          <div key={stars.length} className="mt-8 mx-auto max-w-xl rounded-3xl border border-gold/40 bg-card/80 backdrop-blur p-6 shadow-romantic animate-fade-up">
+            <p className="text-xs uppercase tracking-[0.3em] text-gold">your drawing reads</p>
+            <p className="mt-2 font-display text-2xl md:text-3xl text-deep italic">↳ {reading.name}</p>
+            <p className="mt-3 font-script text-xl text-rose leading-snug">{reading.meaning}</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ───────── Open When… envelopes ─────────
+const openWhen = [
+  { when: "you miss me", msg: "close your eyes. count to 11. that's the second I'm thinking of you. (spoiler: I always am.)" },
+  { when: "you had a bad day", msg: "breathe, ya hayati. tomorrow doesn't know what you survived today. and I'm so proud of you." },
+  { when: "exams are crushing you", msg: "you were built for this coat. one page at a time. Dr. Amal is loading… 🩺" },
+  { when: "you feel far from me", msg: "look up. same moon, same sky. distance is just geography — it can't touch us." },
+  { when: "you need to laugh", msg: "remember that voice note where you couldn't stop laughing? play it back. that's my favourite song." },
+  { when: "you doubt my love", msg: "wlh kanbghik bzaf. read this 100 times if you need to. it'll still be true on the 101st." },
+];
+function OpenWhen() {
+  const [opened, setOpened] = useState<Set<number>>(new Set());
+  const toggle = (i: number) => {
+    setOpened((s) => { const n = new Set(s); n.has(i) ? n.delete(i) : n.add(i); return n; });
+  };
+  return (
+    <section className="relative px-6 py-24">
+      <div className="max-w-5xl mx-auto text-center">
+        <p className="font-script text-3xl text-rose">open when…</p>
+        <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">six envelopes, six moods</h2>
+        <p className="mt-3 text-muted-foreground">tap the one you need today, ya hayati 💌</p>
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {openWhen.map((o, i) => {
+            const isOpen = opened.has(i);
+            return (
+              <button
+                key={i}
+                onClick={() => toggle(i)}
+                className="group relative rounded-2xl border border-rose/20 bg-card/80 backdrop-blur p-6 text-left shadow-sm hover:shadow-romantic hover:-translate-y-1 transition-all min-h-[180px]"
+              >
+                <div className="text-3xl">{isOpen ? "💌" : "✉️"}</div>
+                <p className="mt-3 font-display text-lg text-gold">open when {o.when}</p>
+                {isOpen ? (
+                  <p className="mt-3 font-display italic text-deep leading-snug animate-fade-up">{o.msg}</p>
+                ) : (
+                  <p className="mt-3 font-script text-rose/80">tap to open…</p>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ───────── Heartbeat Sync ─────────
+function HeartbeatSync() {
+  const [holding, setHolding] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [synced, setSynced] = useState(false);
+  useEffect(() => {
+    if (!holding) return;
+    const id = setInterval(() => setSeconds((s) => s + 0.1), 100);
+    return () => clearInterval(id);
+  }, [holding]);
+  useEffect(() => {
+    if (seconds >= 5 && !synced) setSynced(true);
+  }, [seconds, synced]);
+  const start = () => { setHolding(true); setSynced(false); setSeconds(0); };
+  const stop = () => { setHolding(false); if (seconds < 5) setSeconds(0); };
+  return (
+    <section className="relative px-6 py-24 text-center">
+      <p className="font-script text-3xl text-rose">a tiny ritual</p>
+      <h2 className="mt-2 font-display text-4xl md:text-6xl text-deep">sync our heartbeats</h2>
+      <p className="mt-3 text-muted-foreground">hold the heart for 5 seconds — somewhere, mine is doing the same</p>
+      <div className="mt-12 flex flex-col items-center gap-6">
+        <button
+          onMouseDown={start}
+          onMouseUp={stop}
+          onMouseLeave={stop}
+          onTouchStart={start}
+          onTouchEnd={stop}
+          className="select-none text-9xl"
+          style={{ animation: holding ? "heartbeat 0.8s ease-in-out infinite" : "heartbeat 1.4s ease-in-out infinite" }}
+          aria-label="hold to sync"
+        >💗</button>
+        <div className="h-2 w-64 rounded-full bg-card border border-rose/30 overflow-hidden">
+          <div
+            className="h-full transition-all duration-100"
+            style={{ width: `${Math.min(100, (seconds / 5) * 100)}%`, background: "var(--gradient-romance)" }}
+          />
+        </div>
+        <p className="font-display text-lg text-deep">{seconds.toFixed(1)}s / 5.0s</p>
+        {synced && (
+          <p className="font-script text-2xl md:text-3xl text-rose animate-fade-up max-w-md">
+            felt that? our hearts just beat together. miles away, still in rhythm 💞
+          </p>
+        )}
       </div>
     </section>
   );
@@ -1020,7 +1111,6 @@ function Index() {
       style={{ background: "radial-gradient(ellipse at top, oklch(0.95 0.05 15) 0%, oklch(0.985 0.012 20) 50%, oklch(0.92 0.06 25) 100%)" }}
     >
       <FloatingHearts />
-      <MusicPlayer />
       <div className="relative z-10">
         <Hero />
         <BirthdayWish />
@@ -1032,6 +1122,8 @@ function Index() {
         <LoveWheel />
         <MemoryMatch />
         <Constellation />
+        <OpenWhen />
+        <HeartbeatSync />
         <Timeline />
         <SecretVault />
         <Letter />

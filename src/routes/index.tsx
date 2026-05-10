@@ -1111,7 +1111,6 @@ function Index() {
       style={{ background: "radial-gradient(ellipse at top, oklch(0.95 0.05 15) 0%, oklch(0.985 0.012 20) 50%, oklch(0.92 0.06 25) 100%)" }}
     >
       <FloatingHearts />
-      <MusicPlayer />
       <div className="relative z-10">
         <Hero />
         <BirthdayWish />
@@ -1123,6 +1122,8 @@ function Index() {
         <LoveWheel />
         <MemoryMatch />
         <Constellation />
+        <OpenWhen />
+        <HeartbeatSync />
         <Timeline />
         <SecretVault />
         <Letter />

@@ -821,36 +821,6 @@ function FinalSurprise() {
   );
 }
 
-// ───────── Music Player (M3ak — Manal) ─────────
-function MusicPlayer() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [ready, setReady] = useState(true);
-  const toggle = async () => {
-    const a = audioRef.current;
-    if (!a) return;
-    try {
-      if (playing) { a.pause(); setPlaying(false); }
-      else { await a.play(); setPlaying(true); }
-    } catch { setReady(false); }
-  };
-  return (
-    <>
-      <audio ref={audioRef} src="/music.mp3" loop preload="auto" onEnded={() => setPlaying(false)} />
-      <button
-        onClick={toggle}
-        className="fixed bottom-5 right-5 z-50 group flex items-center gap-2 rounded-full bg-card/90 backdrop-blur-md border border-rose/30 px-4 py-3 shadow-romantic hover:scale-105 transition-transform"
-        aria-label="toggle music"
-      >
-        <span className={`text-2xl ${playing ? "animate-heartbeat" : ""}`}>{playing ? "🎵" : "🎶"}</span>
-        <span className="font-script text-rose text-lg leading-none">
-          {ready ? (playing ? "M3ak — Manal" : "play our song") : "add /music.mp3"}
-        </span>
-      </button>
-    </>
-  );
-}
-
 // ───────── Love Note Generator ─────────
 const noteStarts = ["habibti", "ya hayati", "ya 9amar", "my Amal", "my whole world"];
 const noteMids = [

@@ -27,17 +27,19 @@ function useTogether() {
 }
 
 function FloatingHearts() {
-  const hearts = useMemo(
-    () => Array.from({ length: 18 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 12,
-      duration: 10 + Math.random() * 10,
-      size: 14 + Math.random() * 22,
-      opacity: 0.4 + Math.random() * 0.5,
-    })),
-    []
-  );
+  const [hearts, setHearts] = useState<{ id: number; left: number; delay: number; duration: number; size: number; opacity: number }[]>([]);
+  useEffect(() => {
+    setHearts(
+      Array.from({ length: 18 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 12,
+        duration: 10 + Math.random() * 10,
+        size: 14 + Math.random() * 22,
+        opacity: 0.4 + Math.random() * 0.5,
+      }))
+    );
+  }, []);
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
       {hearts.map((h) => (

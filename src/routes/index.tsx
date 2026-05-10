@@ -10,11 +10,17 @@ const ANCHOR_DATE = new Date("2026-05-11T00:00:00");
 const ANCHOR_DAYS = 32;
 
 function useTogether() {
-  const [now, setNow] = useState(() => Date.now());
+  const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState(() => ANCHOR_DATE.getTime());
   useEffect(() => {
+    setMounted(true);
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 50);
     return () => clearInterval(id);
   }, []);
+  if (!mounted) {
+    return { days: ANCHOR_DAYS, hours: 0, minutes: 0, seconds: 0, ms: 0, mounted: false };
+  }
   const diffMs = now - ANCHOR_DATE.getTime();
   const totalMs = ANCHOR_DAYS * 86400000 + diffMs;
   const totalSec = Math.max(ANCHOR_DAYS * 86400, totalMs / 1000);
@@ -23,7 +29,7 @@ function useTogether() {
   const minutes = Math.floor((totalSec % 3600) / 60);
   const seconds = Math.floor(totalSec % 60);
   const ms = Math.floor((totalSec * 1000) % 1000);
-  return { days, hours, minutes, seconds, ms };
+  return { days, hours, minutes, seconds, ms, mounted: true };
 }
 
 function FloatingHearts() {

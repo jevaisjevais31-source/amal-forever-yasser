@@ -1601,6 +1601,9 @@ function Index() {
       style={{ background: "radial-gradient(ellipse at top, oklch(0.95 0.05 15) 0%, oklch(0.985 0.012 20) 50%, oklch(0.92 0.06 25) 100%)" }}
     >
       <FloatingHearts />
+      <a href="/chat" className="fixed top-4 right-4 z-50 rounded-full bg-rose-500 text-white px-4 py-2 text-sm font-medium shadow-lg hover:bg-rose-600 transition flex items-center gap-2">
+        💬 Chat with me
+      </a>
       <div className="relative z-10">
         <Hero />
         <BirthdayWish />

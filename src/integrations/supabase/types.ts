@@ -19,6 +19,8 @@ export type Database = {
           addressee_id: string
           created_at: string
           id: string
+          is_favorite: boolean
+          relationship_type: string
           requester_id: string
           status: Database["public"]["Enums"]["friendship_status"]
         }
@@ -26,6 +28,8 @@ export type Database = {
           addressee_id: string
           created_at?: string
           id?: string
+          is_favorite?: boolean
+          relationship_type?: string
           requester_id: string
           status?: Database["public"]["Enums"]["friendship_status"]
         }
@@ -33,6 +37,8 @@ export type Database = {
           addressee_id?: string
           created_at?: string
           id?: string
+          is_favorite?: boolean
+          relationship_type?: string
           requester_id?: string
           status?: Database["public"]["Enums"]["friendship_status"]
         }
@@ -59,6 +65,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          reactions: Json
           read_at: string | null
           receiver_id: string
           sender_id: string
@@ -68,6 +75,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          reactions?: Json
           read_at?: string | null
           receiver_id: string
           sender_id: string
@@ -77,6 +85,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          reactions?: Json
           read_at?: string | null
           receiver_id?: string
           sender_id?: string
@@ -100,28 +109,46 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accent_color: string
           avatar_url: string | null
+          bio: string | null
           created_at: string
           display_name: string
           id: string
           is_online: boolean
           last_seen: string
+          level: number
+          status: string | null
+          theme: string
+          xp: number
         }
         Insert: {
+          accent_color?: string
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name: string
           id: string
           is_online?: boolean
           last_seen?: string
+          level?: number
+          status?: string | null
+          theme?: string
+          xp?: number
         }
         Update: {
+          accent_color?: string
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string
           id?: string
           is_online?: boolean
           last_seen?: string
+          level?: number
+          status?: string | null
+          theme?: string
+          xp?: number
         }
         Relationships: []
       }
@@ -130,7 +157,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      add_xp: {
+        Args: { _amount: number; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       friendship_status: "pending" | "accepted"

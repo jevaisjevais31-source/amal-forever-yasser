@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Send, ImagePlus, Smile, UserPlus, Search, LogOut, Check, X, Heart, ArrowLeft, Sparkles, Star, Settings, Award, Crown, Flame, Trophy } from "lucide-react";
+import { HackMode } from "@/components/HackMode";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({

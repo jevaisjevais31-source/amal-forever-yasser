@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Send, ImagePlus, Smile, UserPlus, Search, LogOut, Check, X, Heart, ArrowLeft, Sparkles, Star, Settings, Award, Crown, Flame, Trophy } from "lucide-react";
+import { HackMode } from "@/components/HackMode";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
@@ -514,6 +515,15 @@ function ChatPage() {
                   {activeFriend.status || (activeFriend.is_online ? "online now" : `last seen ${new Date(activeFriend.last_seen).toLocaleString()}`)}
                 </div>
               </div>
+              <HackMode
+                messages={messages}
+                userId={userId!}
+                friendId={activeFriendId!}
+                friendName={activeFriend.display_name}
+                myName={me?.display_name ?? "You"}
+                accent={me?.accent_color ?? "#10b981"}
+                sendMessage={(t) => sendMessage(t)}
+              />
               <button onClick={() => toggleFavorite(activeFriendship)} title="Favorite" className="p-2 rounded-full hover:bg-white/10">
                 <Star className={`h-5 w-5 ${activeFriendship.is_favorite ? "text-amber-300 fill-amber-300" : "text-slate-400"}`} />
               </button>

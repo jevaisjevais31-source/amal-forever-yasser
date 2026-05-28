@@ -393,6 +393,9 @@ function ChatPage() {
         </div>
       )}
 
+      {/* Pet unlock modal */}
+      {newPet && <PetUnlockModal pet={newPet} onClose={clearNewPet} />}
+
       {/* Sidebar */}
       <aside className={`${showSidebarMobile ? "flex" : "hidden"} md:flex flex-col w-full md:w-[340px] border-r border-white/10`} style={{ background: "rgba(0,0,0,0.35)" }}>
         <header className="flex items-center justify-between px-4 py-3 border-b border-white/10">

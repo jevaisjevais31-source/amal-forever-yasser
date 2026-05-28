@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Send, ImagePlus, Smile, UserPlus, Search, LogOut, Check, X, Heart, ArrowLeft, Sparkles, Star, Settings, Award, Crown, Flame, Trophy } from "lucide-react";
 import { HackMode } from "@/components/HackMode";
+import { usePets, PetUnlockModal, PetsButton } from "@/components/PetRewards";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
@@ -106,6 +107,7 @@ function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeFriendIdRef = useRef<string | null>(null);
   const prevLevelRef = useRef<number | null>(null);
+  const { newPet, clearNewPet } = usePets(userId, me?.level ?? 1);
 
   useEffect(() => { activeFriendIdRef.current = activeFriendId; }, [activeFriendId]);
 
@@ -391,6 +393,9 @@ function ChatPage() {
         </div>
       )}
 
+      {/* Pet unlock modal */}
+      {newPet && <PetUnlockModal pet={newPet} onClose={clearNewPet} />}
+
       {/* Sidebar */}
       <aside className={`${showSidebarMobile ? "flex" : "hidden"} md:flex flex-col w-full md:w-[340px] border-r border-white/10`} style={{ background: "rgba(0,0,0,0.35)" }}>
         <header className="flex items-center justify-between px-4 py-3 border-b border-white/10">
@@ -410,6 +415,7 @@ function ChatPage() {
             </div>
           </button>
           <div className="flex items-center gap-1">
+            {userId && <PetsButton userId={userId} currentLevel={me?.level ?? 1} />}
             <button onClick={() => setShowAdd(true)} title="Add friend" className="rounded-full p-2 hover:bg-white/10"><UserPlus className="h-5 w-5" /></button>
             <button onClick={() => supabase.auth.signOut()} title="Sign out" className="rounded-full p-2 hover:bg-white/10"><LogOut className="h-5 w-5" /></button>
           </div>

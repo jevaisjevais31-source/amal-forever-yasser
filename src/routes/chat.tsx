@@ -415,6 +415,7 @@ function ChatPage() {
             </div>
           </button>
           <div className="flex items-center gap-1">
+            {userId && <PetsButton userId={userId} currentLevel={me?.level ?? 1} />}
             <button onClick={() => setShowAdd(true)} title="Add friend" className="rounded-full p-2 hover:bg-white/10"><UserPlus className="h-5 w-5" /></button>
             <button onClick={() => supabase.auth.signOut()} title="Sign out" className="rounded-full p-2 hover:bg-white/10"><LogOut className="h-5 w-5" /></button>
           </div>

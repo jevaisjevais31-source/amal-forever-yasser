@@ -107,6 +107,7 @@ function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeFriendIdRef = useRef<string | null>(null);
   const prevLevelRef = useRef<number | null>(null);
+  const { newPet, clearNewPet } = usePets(userId, me?.level ?? 1);
 
   useEffect(() => { activeFriendIdRef.current = activeFriendId; }, [activeFriendId]);
 

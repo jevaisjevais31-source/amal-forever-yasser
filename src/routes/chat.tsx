@@ -82,6 +82,18 @@ const AI_QUICK = [
   { mode: "fight",      icon: "🕊️", label: "Make peace",   prompt: "Help me reconnect after a small fight." },
 ];
 
+function Avatar({ p, size = 40, ring }: { p: { display_name: string; avatar_url: string | null; accent_color: string }; size?: number; ring?: string }) {
+  const style: React.CSSProperties = { width: size, height: size, background: `linear-gradient(135deg, ${p.accent_color || "#ec4899"}, #6366f1)`, fontSize: size * 0.4 };
+  if (p.avatar_url) {
+    return <img src={p.avatar_url} alt={p.display_name} className={`rounded-full object-cover ${ring ?? ""}`} style={{ width: size, height: size }} />;
+  }
+  return (
+    <div className={`rounded-full grid place-items-center font-semibold text-white ${ring ?? ""}`} style={style}>
+      {p.display_name[0]?.toUpperCase()}
+    </div>
+  );
+}
+
 const BADGES = (p: Profile, msgCount: number) => {
   const list: { icon: string; label: string; color: string }[] = [];
   if (p.level >= 5) list.push({ icon: "🌟", label: "Rising Star", color: "text-yellow-300" });

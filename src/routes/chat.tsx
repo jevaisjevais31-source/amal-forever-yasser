@@ -58,12 +58,29 @@ const QUICK_REACTIONS = ["❤️","😂","😮","😢","🔥","👏"];
 const STICKERS = ["🐻‍❄️","🦄","🌈","🐰","🍩","🌻","🎈","🪐","🍓","🧸","💎","🎂","☁️","🌊","🎨","🪞","🦋","🍒","🕊️","🪷"];
 
 const THEMES: Record<string, { bg: string; bubble: string; mineColor: string; name: string; glow: string }> = {
-  default: { name: "Emerald", bg: "#0b141a", bubble: "#202c33", mineColor: "bg-emerald-600", glow: "rgba(16,185,129,0.12)" },
-  couple:  { name: "Couple 💕", bg: "#1a0a14", bubble: "#3d1a2a", mineColor: "bg-rose-500", glow: "rgba(244,63,94,0.18)" },
-  bestie:  { name: "Best Friend 🌟", bg: "#0f0a1f", bubble: "#2a1f4a", mineColor: "bg-violet-500", glow: "rgba(139,92,246,0.18)" },
-  sunset:  { name: "Sunset 🌅", bg: "#1a1208", bubble: "#3d2a14", mineColor: "bg-orange-500", glow: "rgba(249,115,22,0.18)" },
-  ocean:   { name: "Ocean 🌊", bg: "#08141a", bubble: "#143a4a", mineColor: "bg-cyan-500", glow: "rgba(6,182,212,0.18)" },
+  default:  { name: "Emerald",      bg: "#0b141a", bubble: "#202c33", mineColor: "bg-emerald-600", glow: "rgba(16,185,129,0.12)" },
+  couple:   { name: "Couple 💕",    bg: "#1a0a14", bubble: "#3d1a2a", mineColor: "bg-rose-500",    glow: "rgba(244,63,94,0.18)" },
+  bestie:   { name: "Best Friend 🌟",bg: "#0f0a1f", bubble: "#2a1f4a", mineColor: "bg-violet-500", glow: "rgba(139,92,246,0.18)" },
+  sunset:   { name: "Sunset 🌅",    bg: "#1a1208", bubble: "#3d2a14", mineColor: "bg-orange-500",  glow: "rgba(249,115,22,0.18)" },
+  ocean:    { name: "Ocean 🌊",     bg: "#08141a", bubble: "#143a4a", mineColor: "bg-cyan-500",    glow: "rgba(6,182,212,0.18)" },
+  midnight: { name: "Midnight 🌌",  bg: "#070713", bubble: "#1a1a3a", mineColor: "bg-indigo-600",  glow: "rgba(99,102,241,0.20)" },
+  candy:    { name: "Candy 🍭",     bg: "#1a0820", bubble: "#3a1240", mineColor: "bg-pink-500",    glow: "rgba(236,72,153,0.22)" },
+  forest:   { name: "Forest 🌲",    bg: "#08140e", bubble: "#143a26", mineColor: "bg-green-600",   glow: "rgba(34,197,94,0.15)" },
+  galaxy:   { name: "Galaxy 🪐",    bg: "#0a0820", bubble: "#241a4a", mineColor: "bg-fuchsia-600", glow: "rgba(217,70,239,0.20)" },
+  peach:    { name: "Peach 🍑",     bg: "#1f100a", bubble: "#4a2418", mineColor: "bg-orange-400",  glow: "rgba(251,146,60,0.20)" },
+  neon:     { name: "Neon 💚",      bg: "#050a05", bubble: "#0f2a14", mineColor: "bg-lime-500",    glow: "rgba(132,204,22,0.22)" },
+  cherry:   { name: "Cherry 🍒",    bg: "#1a0608", bubble: "#3d0f14", mineColor: "bg-red-500",     glow: "rgba(239,68,68,0.20)" },
+  lavender: { name: "Lavender 💜",  bg: "#100a1f", bubble: "#2a204a", mineColor: "bg-purple-500",  glow: "rgba(168,85,247,0.18)" },
 };
+
+const AI_QUICK = [
+  { mode: "idea",       icon: "💡", label: "Date idea",    prompt: "Give us a fresh date idea for this week." },
+  { mode: "spicy",      icon: "🔥", label: "Spice it up",  prompt: "Make this chat spicier — drop a flirty dare." },
+  { mode: "question",   icon: "❓", label: "Deep Q",       prompt: "Ask us a deep question to open up." },
+  { mode: "game",       icon: "🎮", label: "Start a game", prompt: "Start a quick fun game with us right now." },
+  { mode: "compliment", icon: "💖", label: "Compliment",   prompt: "Write a sweet compliment I can send." },
+  { mode: "fight",      icon: "🕊️", label: "Make peace",   prompt: "Help me reconnect after a small fight." },
+];
 
 const BADGES = (p: Profile, msgCount: number) => {
   const list: { icon: string; label: string; color: string }[] = [];

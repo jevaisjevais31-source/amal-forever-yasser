@@ -844,9 +844,10 @@ function ChatPage() {
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(THEMES).filter(([k]) => k !== "couple" && k !== "bestie").map(([k, t]) => (
                 <button key={k} onClick={() => saveProfile({ theme: k })}
-                  className={`rounded-lg px-3 py-2.5 text-sm text-left transition-all ${me.theme === k ? "ring-2 ring-white/50" : "hover:bg-white/5"}`}
+                  className={`rounded-lg px-3 py-2.5 text-sm text-left transition-all relative overflow-hidden ${me.theme === k ? "ring-2 ring-white/50" : "hover:bg-white/5"}`}
                   style={{ background: t.bg, border: "1px solid rgba(255,255,255,0.1)" }}>
-                  {t.name}
+                  <span className="relative z-10">{t.name}</span>
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full" style={{ background: t.glow.replace("0.1", "0.6").replace("0.2", "0.8") }} />
                 </button>
               ))}
             </div>

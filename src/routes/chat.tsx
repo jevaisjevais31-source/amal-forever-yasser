@@ -358,6 +358,40 @@ function ChatPage() {
     if (fileRef.current) fileRef.current.value = "";
   }
 
+  async function onPickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+    setUploadingAvatar(true);
+    const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+    const path = `${userId}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("chat-images").upload(path, file, { upsert: true });
+    if (error) { toast.error(error.message); setUploadingAvatar(false); return; }
+    const { data } = supabase.storage.from("chat-images").getPublicUrl(path);
+    await saveProfile({ avatar_url: data.publicUrl });
+    setUploadingAvatar(false);
+    if (avatarFileRef.current) avatarFileRef.current.value = "";
+  }
+
+  async function askAmal(mode: string, prompt: string) {
+    if (!userId || !activeFriendId) return;
+    setAiMenuOpen(false);
+    setAiLoading(true);
+    try {
+      const ctx = messages.slice(-8).map((m) => `${m.sender_id === userId ? "Me" : "Them"}: ${m.content ?? "[image]"}`).join("\n");
+      const r = await fetch("/api/ai-assist", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt, mode, context: ctx }),
+      });
+      const j = await r.json() as { text?: string; error?: string };
+      if (j.error) { toast.error(j.error); setAiLoading(false); return; }
+      await supabase.from("messages").insert({
+        sender_id: userId, receiver_id: activeFriendId,
+        content: `🤖 Amal: ${j.text ?? "…"}`, image_url: null,
+      });
+    } catch { toast.error("AI failed"); }
+    setAiLoading(false);
+  }
+
   async function doSearch() {
     if (!searchQuery.trim()) { setSearchResults([]); return; }
     const { data } = await supabase.from("profiles").select("*")

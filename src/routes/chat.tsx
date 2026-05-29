@@ -583,9 +583,7 @@ function ChatPage() {
             <header className="flex items-center gap-3 px-4 py-3 border-b border-white/10 backdrop-blur" style={{ background: "rgba(0,0,0,0.35)" }}>
               <button onClick={() => setShowSidebarMobile(true)} className="md:hidden p-1 -ml-1"><ArrowLeft className="h-5 w-5"/></button>
               <div className="relative">
-                <div className="h-10 w-10 rounded-full grid place-items-center font-semibold text-white" style={{ background: `linear-gradient(135deg, ${activeFriend.accent_color || "#ec4899"}, #6366f1)` }}>
-                  {activeFriend.display_name[0]?.toUpperCase()}
-                </div>
+                <Avatar p={activeFriend} size={40} />
                 {activeFriend.is_online && <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-black/50" />}
               </div>
               <div className="min-w-0 flex-1">

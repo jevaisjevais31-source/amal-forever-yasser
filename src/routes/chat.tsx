@@ -552,9 +552,7 @@ function ChatPage() {
               <button key={fid} onClick={() => { setActiveFriendId(fid); setShowSidebarMobile(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 text-left border-b border-white/[0.04] ${isActive ? "bg-white/[0.06]" : ""}`}>
                 <div className="relative">
-                  <div className="h-12 w-12 rounded-full grid place-items-center font-semibold text-white" style={{ background: `linear-gradient(135deg, ${p.accent_color || "#ec4899"}, #6366f1)` }}>
-                    {p.display_name[0]?.toUpperCase()}
-                  </div>
+                  <Avatar p={p} size={48} />
                   {p.is_online && <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 ring-2" style={{ boxShadow: "0 0 8px #10b981" }} />}
                   {fship?.is_favorite && <Star className="absolute -top-1 -left-1 h-3.5 w-3.5 text-amber-300 fill-amber-300" />}
                 </div>

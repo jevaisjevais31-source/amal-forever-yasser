@@ -793,9 +793,17 @@ function ChatPage() {
             </div>
 
             <div className="flex flex-col items-center mb-6">
-              <div className="h-20 w-20 rounded-full grid place-items-center text-3xl font-bold text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${me.accent_color}, #6366f1)` }}>
-                {me.display_name[0]?.toUpperCase()}
+              <div className="relative group">
+                <Avatar p={me} size={88} />
+                <button onClick={() => avatarFileRef.current?.click()} disabled={uploadingAvatar}
+                  className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity grid place-items-center text-white text-xs font-medium disabled:opacity-100">
+                  {uploadingAvatar ? "Uploading…" : <span className="flex flex-col items-center gap-1"><Camera className="h-5 w-5" />Change</span>}
+                </button>
+                <input ref={avatarFileRef} type="file" accept="image/*" hidden onChange={onPickAvatar} />
               </div>
+              {me.avatar_url && (
+                <button onClick={() => saveProfile({ avatar_url: null })} className="mt-1 text-[10px] text-slate-500 hover:text-rose-300">remove photo</button>
+              )}
               <div className="mt-2 flex items-center gap-2">
                 <Trophy className="h-4 w-4 text-amber-400"/>
                 <span className="font-bold">Level {me.level}</span>

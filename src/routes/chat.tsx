@@ -119,12 +119,31 @@ function ChatPage() {
   const [showSidebarMobile, setShowSidebarMobile] = useState(true);
   const [reactingTo, setReactingTo] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiMenuOpen, setAiMenuOpen] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [levelUpFlash, setLevelUpFlash] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const avatarFileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeFriendIdRef = useRef<string | null>(null);
   const prevLevelRef = useRef<number | null>(null);
   const { newPet, clearNewPet } = usePets(userId, me?.level ?? 1);
+
+  const favKey = userId && activeFriendId ? `whispr-fav-${userId}-${activeFriendId}` : null;
+  useEffect(() => {
+    if (!favKey) { setFavorites([]); return; }
+    try { setFavorites(JSON.parse(localStorage.getItem(favKey) ?? "[]")); } catch { setFavorites([]); }
+  }, [favKey]);
+  const toggleFavoriteMessage = (id: string) => {
+    if (!favKey) return;
+    setFavorites((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      localStorage.setItem(favKey, JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => { activeFriendIdRef.current = activeFriendId; }, [activeFriendId]);
 

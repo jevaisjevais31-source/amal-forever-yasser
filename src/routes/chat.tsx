@@ -483,9 +483,7 @@ function ChatPage() {
         <header className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <button onClick={() => setShowProfile(true)} className="flex items-center gap-3 min-w-0 hover:opacity-80">
             <div className="relative">
-              <div className="h-11 w-11 rounded-full grid place-items-center font-semibold text-white" style={{ background: `linear-gradient(135deg, ${me?.accent_color ?? "#ec4899"}, #6366f1)` }}>
-                {me?.display_name?.[0]?.toUpperCase() ?? "?"}
-              </div>
+              {me ? <Avatar p={me} size={44} /> : <div className="h-11 w-11 rounded-full bg-white/10" />}
               {(me?.level ?? 1) >= 5 && <Crown className="absolute -top-1.5 -right-1 h-4 w-4 text-yellow-400 fill-yellow-400" />}
             </div>
             <div className="min-w-0 text-left">

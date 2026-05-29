@@ -925,6 +925,32 @@ function ChatPage() {
           </div>
         </div>
       )}
+
+      {/* Favorite messages modal */}
+      {showFavorites && (
+        <div onClick={() => setShowFavorites(false)} className="fixed inset-0 z-50 bg-black/70 grid place-items-center px-4">
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl bg-[#1a262d] border border-white/10 p-5 shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold flex items-center gap-2"><Bookmark className="h-5 w-5 text-amber-300 fill-amber-300"/> Favorite messages</h3>
+              <button onClick={() => setShowFavorites(false)} className="p-1 rounded hover:bg-white/10"><X className="h-5 w-5"/></button>
+            </div>
+            <div className="overflow-y-auto space-y-2">
+              {favorites.length === 0 && <div className="text-sm text-slate-400 text-center py-8">No favorites yet. Hover a message and tap the bookmark.</div>}
+              {messages.filter((m) => favorites.includes(m.id)).map((m) => (
+                <div key={m.id} className="rounded-xl bg-white/5 p-3 border border-white/10">
+                  <div className="text-[10px] text-slate-400 mb-1 flex items-center justify-between">
+                    <span>{m.sender_id === userId ? "You" : activeFriend?.display_name}</span>
+                    <button onClick={() => toggleFavoriteMessage(m.id)} className="text-rose-300 hover:underline">remove</button>
+                  </div>
+                  {m.image_url && <img src={m.image_url} alt="" className="rounded-lg mb-2 max-h-40 object-cover" />}
+                  {m.content && <div className="text-sm whitespace-pre-wrap break-words">{m.content}</div>}
+                  <div className="text-[10px] text-slate-500 mt-1">{new Date(m.created_at).toLocaleString()}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

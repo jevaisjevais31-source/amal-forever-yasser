@@ -696,6 +696,13 @@ function ChatPage() {
                         className={`absolute -top-2 ${mine ? "-left-7" : "-right-7"} opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-[#202c33] hover:bg-[#2a3942] border border-white/10 p-1`}>
                         <Smile className="h-3.5 w-3.5 text-slate-300" />
                       </button>
+                      {/* Favorite message button */}
+                      <button onClick={() => toggleFavoriteMessage(m.id)} title={favorites.includes(m.id) ? "Unfavorite" : "Favorite"}
+                        className={`absolute -bottom-2 ${mine ? "-left-7" : "-right-7"} ${favorites.includes(m.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity rounded-full bg-[#202c33] hover:bg-[#2a3942] border border-white/10 p-1`}>
+                        {favorites.includes(m.id)
+                          ? <Bookmark className="h-3.5 w-3.5 text-amber-300 fill-amber-300" />
+                          : <BookmarkPlus className="h-3.5 w-3.5 text-slate-300" />}
+                      </button>
 
                       {/* Reaction picker */}
                       {reactingTo === m.id && (

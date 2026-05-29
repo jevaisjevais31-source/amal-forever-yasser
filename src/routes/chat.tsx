@@ -308,7 +308,7 @@ function ChatPage() {
       });
       setAiLoading(true);
       try {
-        const ctx = messages.slice(-6).map((m) => `${m.sender_id === userId ? "Me" : "Them"}: ${m.content ?? "[image]"}`).join("\n");
+        const ctx = messages.slice(-8).map((m) => `${m.sender_id === userId ? "Me" : "Them"}: ${m.content ?? "[image]"}`).join("\n");
         const r = await fetch("/api/ai-assist", {
           method: "POST", headers: { "content-type": "application/json" },
           body: JSON.stringify({ prompt: aiMatch[1], context: ctx }),

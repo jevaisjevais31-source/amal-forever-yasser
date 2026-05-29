@@ -606,7 +606,25 @@ function ChatPage() {
                 accent={me?.accent_color ?? "#10b981"}
                 sendMessage={(t) => sendMessage(t)}
               />
-              <button onClick={() => toggleFavorite(activeFriendship)} title="Favorite" className="p-2 rounded-full hover:bg-white/10">
+              <div className="relative">
+                <button onClick={() => setAiMenuOpen((v) => !v)} title="Ask Amal AI" className="p-2 rounded-full hover:bg-white/10">
+                  <Wand2 className="h-5 w-5 text-violet-300" />
+                </button>
+                {aiMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-60 rounded-xl bg-[#1a262d] border border-white/10 shadow-2xl z-30 overflow-hidden">
+                    <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-violet-300 border-b border-white/10 bg-violet-500/10">✨ Amal AI — Spice it up</div>
+                    {AI_QUICK.map((a) => (
+                      <button key={a.mode} onClick={() => askAmal(a.mode, a.prompt)} className="w-full text-left px-3 py-2 hover:bg-white/5 text-sm flex items-center gap-2">
+                        <span className="text-base">{a.icon}</span> {a.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button onClick={() => setShowFavorites(true)} title="Favorite messages" className="p-2 rounded-full hover:bg-white/10">
+                <Bookmark className="h-5 w-5 text-amber-300" />
+              </button>
+              <button onClick={() => toggleFavorite(activeFriendship)} title="Favorite friend" className="p-2 rounded-full hover:bg-white/10">
                 <Star className={`h-5 w-5 ${activeFriendship.is_favorite ? "text-amber-300 fill-amber-300" : "text-slate-400"}`} />
               </button>
               <div className="relative">

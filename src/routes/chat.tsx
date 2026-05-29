@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import { Send, ImagePlus, Smile, UserPlus, Search, LogOut, Check, X, Heart, ArrowLeft, Sparkles, Star, Settings, Award, Crown, Flame, Trophy } from "lucide-react";
+import { Send, ImagePlus, Smile, UserPlus, Search, LogOut, Check, X, Heart, ArrowLeft, Sparkles, Star, Settings, Award, Crown, Flame, Trophy, Wand2, Camera, BookmarkPlus, Bookmark } from "lucide-react";
 import { HackMode } from "@/components/HackMode";
 import { usePets, PetUnlockModal, PetsButton } from "@/components/PetRewards";
 
@@ -58,12 +58,41 @@ const QUICK_REACTIONS = ["❤️","😂","😮","😢","🔥","👏"];
 const STICKERS = ["🐻‍❄️","🦄","🌈","🐰","🍩","🌻","🎈","🪐","🍓","🧸","💎","🎂","☁️","🌊","🎨","🪞","🦋","🍒","🕊️","🪷"];
 
 const THEMES: Record<string, { bg: string; bubble: string; mineColor: string; name: string; glow: string }> = {
-  default: { name: "Emerald", bg: "#0b141a", bubble: "#202c33", mineColor: "bg-emerald-600", glow: "rgba(16,185,129,0.12)" },
-  couple:  { name: "Couple 💕", bg: "#1a0a14", bubble: "#3d1a2a", mineColor: "bg-rose-500", glow: "rgba(244,63,94,0.18)" },
-  bestie:  { name: "Best Friend 🌟", bg: "#0f0a1f", bubble: "#2a1f4a", mineColor: "bg-violet-500", glow: "rgba(139,92,246,0.18)" },
-  sunset:  { name: "Sunset 🌅", bg: "#1a1208", bubble: "#3d2a14", mineColor: "bg-orange-500", glow: "rgba(249,115,22,0.18)" },
-  ocean:   { name: "Ocean 🌊", bg: "#08141a", bubble: "#143a4a", mineColor: "bg-cyan-500", glow: "rgba(6,182,212,0.18)" },
+  default:  { name: "Emerald",      bg: "#0b141a", bubble: "#202c33", mineColor: "bg-emerald-600", glow: "rgba(16,185,129,0.12)" },
+  couple:   { name: "Couple 💕",    bg: "#1a0a14", bubble: "#3d1a2a", mineColor: "bg-rose-500",    glow: "rgba(244,63,94,0.18)" },
+  bestie:   { name: "Best Friend 🌟",bg: "#0f0a1f", bubble: "#2a1f4a", mineColor: "bg-violet-500", glow: "rgba(139,92,246,0.18)" },
+  sunset:   { name: "Sunset 🌅",    bg: "#1a1208", bubble: "#3d2a14", mineColor: "bg-orange-500",  glow: "rgba(249,115,22,0.18)" },
+  ocean:    { name: "Ocean 🌊",     bg: "#08141a", bubble: "#143a4a", mineColor: "bg-cyan-500",    glow: "rgba(6,182,212,0.18)" },
+  midnight: { name: "Midnight 🌌",  bg: "#070713", bubble: "#1a1a3a", mineColor: "bg-indigo-600",  glow: "rgba(99,102,241,0.20)" },
+  candy:    { name: "Candy 🍭",     bg: "#1a0820", bubble: "#3a1240", mineColor: "bg-pink-500",    glow: "rgba(236,72,153,0.22)" },
+  forest:   { name: "Forest 🌲",    bg: "#08140e", bubble: "#143a26", mineColor: "bg-green-600",   glow: "rgba(34,197,94,0.15)" },
+  galaxy:   { name: "Galaxy 🪐",    bg: "#0a0820", bubble: "#241a4a", mineColor: "bg-fuchsia-600", glow: "rgba(217,70,239,0.20)" },
+  peach:    { name: "Peach 🍑",     bg: "#1f100a", bubble: "#4a2418", mineColor: "bg-orange-400",  glow: "rgba(251,146,60,0.20)" },
+  neon:     { name: "Neon 💚",      bg: "#050a05", bubble: "#0f2a14", mineColor: "bg-lime-500",    glow: "rgba(132,204,22,0.22)" },
+  cherry:   { name: "Cherry 🍒",    bg: "#1a0608", bubble: "#3d0f14", mineColor: "bg-red-500",     glow: "rgba(239,68,68,0.20)" },
+  lavender: { name: "Lavender 💜",  bg: "#100a1f", bubble: "#2a204a", mineColor: "bg-purple-500",  glow: "rgba(168,85,247,0.18)" },
 };
+
+const AI_QUICK = [
+  { mode: "idea",       icon: "💡", label: "Date idea",    prompt: "Give us a fresh date idea for this week." },
+  { mode: "spicy",      icon: "🔥", label: "Spice it up",  prompt: "Make this chat spicier — drop a flirty dare." },
+  { mode: "question",   icon: "❓", label: "Deep Q",       prompt: "Ask us a deep question to open up." },
+  { mode: "game",       icon: "🎮", label: "Start a game", prompt: "Start a quick fun game with us right now." },
+  { mode: "compliment", icon: "💖", label: "Compliment",   prompt: "Write a sweet compliment I can send." },
+  { mode: "fight",      icon: "🕊️", label: "Make peace",   prompt: "Help me reconnect after a small fight." },
+];
+
+function Avatar({ p, size = 40, ring }: { p: { display_name: string; avatar_url: string | null; accent_color: string }; size?: number; ring?: string }) {
+  const style: React.CSSProperties = { width: size, height: size, background: `linear-gradient(135deg, ${p.accent_color || "#ec4899"}, #6366f1)`, fontSize: size * 0.4 };
+  if (p.avatar_url) {
+    return <img src={p.avatar_url} alt={p.display_name} className={`rounded-full object-cover ${ring ?? ""}`} style={{ width: size, height: size }} />;
+  }
+  return (
+    <div className={`rounded-full grid place-items-center font-semibold text-white ${ring ?? ""}`} style={style}>
+      {p.display_name[0]?.toUpperCase()}
+    </div>
+  );
+}
 
 const BADGES = (p: Profile, msgCount: number) => {
   const list: { icon: string; label: string; color: string }[] = [];
@@ -102,12 +131,31 @@ function ChatPage() {
   const [showSidebarMobile, setShowSidebarMobile] = useState(true);
   const [reactingTo, setReactingTo] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiMenuOpen, setAiMenuOpen] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [levelUpFlash, setLevelUpFlash] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const avatarFileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeFriendIdRef = useRef<string | null>(null);
   const prevLevelRef = useRef<number | null>(null);
   const { newPet, clearNewPet } = usePets(userId, me?.level ?? 1);
+
+  const favKey = userId && activeFriendId ? `whispr-fav-${userId}-${activeFriendId}` : null;
+  useEffect(() => {
+    if (!favKey) { setFavorites([]); return; }
+    try { setFavorites(JSON.parse(localStorage.getItem(favKey) ?? "[]")); } catch { setFavorites([]); }
+  }, [favKey]);
+  const toggleFavoriteMessage = (id: string) => {
+    if (!favKey) return;
+    setFavorites((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      localStorage.setItem(favKey, JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => { activeFriendIdRef.current = activeFriendId; }, [activeFriendId]);
 
@@ -272,7 +320,7 @@ function ChatPage() {
       });
       setAiLoading(true);
       try {
-        const ctx = messages.slice(-6).map((m) => `${m.sender_id === userId ? "Me" : "Them"}: ${m.content ?? "[image]"}`).join("\n");
+        const ctx = messages.slice(-8).map((m) => `${m.sender_id === userId ? "Me" : "Them"}: ${m.content ?? "[image]"}`).join("\n");
         const r = await fetch("/api/ai-assist", {
           method: "POST", headers: { "content-type": "application/json" },
           body: JSON.stringify({ prompt: aiMatch[1], context: ctx }),
@@ -320,6 +368,40 @@ function ChatPage() {
     const { data } = supabase.storage.from("chat-images").getPublicUrl(path);
     await sendMessage("", data.publicUrl);
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  async function onPickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+    setUploadingAvatar(true);
+    const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+    const path = `${userId}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("chat-images").upload(path, file, { upsert: true });
+    if (error) { toast.error(error.message); setUploadingAvatar(false); return; }
+    const { data } = supabase.storage.from("chat-images").getPublicUrl(path);
+    await saveProfile({ avatar_url: data.publicUrl });
+    setUploadingAvatar(false);
+    if (avatarFileRef.current) avatarFileRef.current.value = "";
+  }
+
+  async function askAmal(mode: string, prompt: string) {
+    if (!userId || !activeFriendId) return;
+    setAiMenuOpen(false);
+    setAiLoading(true);
+    try {
+      const ctx = messages.slice(-8).map((m) => `${m.sender_id === userId ? "Me" : "Them"}: ${m.content ?? "[image]"}`).join("\n");
+      const r = await fetch("/api/ai-assist", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt, mode, context: ctx }),
+      });
+      const j = await r.json() as { text?: string; error?: string };
+      if (j.error) { toast.error(j.error); setAiLoading(false); return; }
+      await supabase.from("messages").insert({
+        sender_id: userId, receiver_id: activeFriendId,
+        content: `🤖 Amal: ${j.text ?? "…"}`, image_url: null,
+      });
+    } catch { toast.error("AI failed"); }
+    setAiLoading(false);
   }
 
   async function doSearch() {
@@ -401,9 +483,7 @@ function ChatPage() {
         <header className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <button onClick={() => setShowProfile(true)} className="flex items-center gap-3 min-w-0 hover:opacity-80">
             <div className="relative">
-              <div className="h-11 w-11 rounded-full grid place-items-center font-semibold text-white" style={{ background: `linear-gradient(135deg, ${me?.accent_color ?? "#ec4899"}, #6366f1)` }}>
-                {me?.display_name?.[0]?.toUpperCase() ?? "?"}
-              </div>
+              {me ? <Avatar p={me} size={44} /> : <div className="h-11 w-11 rounded-full bg-white/10" />}
               {(me?.level ?? 1) >= 5 && <Crown className="absolute -top-1.5 -right-1 h-4 w-4 text-yellow-400 fill-yellow-400" />}
             </div>
             <div className="min-w-0 text-left">
@@ -472,9 +552,7 @@ function ChatPage() {
               <button key={fid} onClick={() => { setActiveFriendId(fid); setShowSidebarMobile(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 text-left border-b border-white/[0.04] ${isActive ? "bg-white/[0.06]" : ""}`}>
                 <div className="relative">
-                  <div className="h-12 w-12 rounded-full grid place-items-center font-semibold text-white" style={{ background: `linear-gradient(135deg, ${p.accent_color || "#ec4899"}, #6366f1)` }}>
-                    {p.display_name[0]?.toUpperCase()}
-                  </div>
+                  <Avatar p={p} size={48} />
                   {p.is_online && <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 ring-2" style={{ boxShadow: "0 0 8px #10b981" }} />}
                   {fship?.is_favorite && <Star className="absolute -top-1 -left-1 h-3.5 w-3.5 text-amber-300 fill-amber-300" />}
                 </div>
@@ -505,9 +583,7 @@ function ChatPage() {
             <header className="flex items-center gap-3 px-4 py-3 border-b border-white/10 backdrop-blur" style={{ background: "rgba(0,0,0,0.35)" }}>
               <button onClick={() => setShowSidebarMobile(true)} className="md:hidden p-1 -ml-1"><ArrowLeft className="h-5 w-5"/></button>
               <div className="relative">
-                <div className="h-10 w-10 rounded-full grid place-items-center font-semibold text-white" style={{ background: `linear-gradient(135deg, ${activeFriend.accent_color || "#ec4899"}, #6366f1)` }}>
-                  {activeFriend.display_name[0]?.toUpperCase()}
-                </div>
+                <Avatar p={activeFriend} size={40} />
                 {activeFriend.is_online && <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-black/50" />}
               </div>
               <div className="min-w-0 flex-1">
@@ -530,7 +606,25 @@ function ChatPage() {
                 accent={me?.accent_color ?? "#10b981"}
                 sendMessage={(t) => sendMessage(t)}
               />
-              <button onClick={() => toggleFavorite(activeFriendship)} title="Favorite" className="p-2 rounded-full hover:bg-white/10">
+              <div className="relative">
+                <button onClick={() => setAiMenuOpen((v) => !v)} title="Ask Amal AI" className="p-2 rounded-full hover:bg-white/10">
+                  <Wand2 className="h-5 w-5 text-violet-300" />
+                </button>
+                {aiMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-60 rounded-xl bg-[#1a262d] border border-white/10 shadow-2xl z-30 overflow-hidden">
+                    <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-violet-300 border-b border-white/10 bg-violet-500/10">✨ Amal AI — Spice it up</div>
+                    {AI_QUICK.map((a) => (
+                      <button key={a.mode} onClick={() => askAmal(a.mode, a.prompt)} className="w-full text-left px-3 py-2 hover:bg-white/5 text-sm flex items-center gap-2">
+                        <span className="text-base">{a.icon}</span> {a.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button onClick={() => setShowFavorites(true)} title="Favorite messages" className="p-2 rounded-full hover:bg-white/10">
+                <Bookmark className="h-5 w-5 text-amber-300" />
+              </button>
+              <button onClick={() => toggleFavorite(activeFriendship)} title="Favorite friend" className="p-2 rounded-full hover:bg-white/10">
                 <Star className={`h-5 w-5 ${activeFriendship.is_favorite ? "text-amber-300 fill-amber-300" : "text-slate-400"}`} />
               </button>
               <div className="relative">
@@ -601,6 +695,13 @@ function ChatPage() {
                       <button onClick={() => setReactingTo(reactingTo === m.id ? null : m.id)}
                         className={`absolute -top-2 ${mine ? "-left-7" : "-right-7"} opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-[#202c33] hover:bg-[#2a3942] border border-white/10 p-1`}>
                         <Smile className="h-3.5 w-3.5 text-slate-300" />
+                      </button>
+                      {/* Favorite message button */}
+                      <button onClick={() => toggleFavoriteMessage(m.id)} title={favorites.includes(m.id) ? "Unfavorite" : "Favorite"}
+                        className={`absolute -bottom-2 ${mine ? "-left-7" : "-right-7"} ${favorites.includes(m.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity rounded-full bg-[#202c33] hover:bg-[#2a3942] border border-white/10 p-1`}>
+                        {favorites.includes(m.id)
+                          ? <Bookmark className="h-3.5 w-3.5 text-amber-300 fill-amber-300" />
+                          : <BookmarkPlus className="h-3.5 w-3.5 text-slate-300" />}
                       </button>
 
                       {/* Reaction picker */}
@@ -692,9 +793,17 @@ function ChatPage() {
             </div>
 
             <div className="flex flex-col items-center mb-6">
-              <div className="h-20 w-20 rounded-full grid place-items-center text-3xl font-bold text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${me.accent_color}, #6366f1)` }}>
-                {me.display_name[0]?.toUpperCase()}
+              <div className="relative group">
+                <Avatar p={me} size={88} />
+                <button onClick={() => avatarFileRef.current?.click()} disabled={uploadingAvatar}
+                  className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity grid place-items-center text-white text-xs font-medium disabled:opacity-100">
+                  {uploadingAvatar ? "Uploading…" : <span className="flex flex-col items-center gap-1"><Camera className="h-5 w-5" />Change</span>}
+                </button>
+                <input ref={avatarFileRef} type="file" accept="image/*" hidden onChange={onPickAvatar} />
               </div>
+              {me.avatar_url && (
+                <button onClick={() => saveProfile({ avatar_url: null })} className="mt-1 text-[10px] text-slate-500 hover:text-rose-300">remove photo</button>
+              )}
               <div className="mt-2 flex items-center gap-2">
                 <Trophy className="h-4 w-4 text-amber-400"/>
                 <span className="font-bold">Level {me.level}</span>
@@ -735,9 +844,10 @@ function ChatPage() {
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(THEMES).filter(([k]) => k !== "couple" && k !== "bestie").map(([k, t]) => (
                 <button key={k} onClick={() => saveProfile({ theme: k })}
-                  className={`rounded-lg px-3 py-2.5 text-sm text-left transition-all ${me.theme === k ? "ring-2 ring-white/50" : "hover:bg-white/5"}`}
+                  className={`rounded-lg px-3 py-2.5 text-sm text-left transition-all relative overflow-hidden ${me.theme === k ? "ring-2 ring-white/50" : "hover:bg-white/5"}`}
                   style={{ background: t.bg, border: "1px solid rgba(255,255,255,0.1)" }}>
-                  {t.name}
+                  <span className="relative z-10">{t.name}</span>
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full" style={{ background: t.glow.replace("0.1", "0.6").replace("0.2", "0.8") }} />
                 </button>
               ))}
             </div>
@@ -798,7 +908,7 @@ function ChatPage() {
                 return (
                   <li key={p.id} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 hover:bg-white/5">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-9 w-9 rounded-full grid place-items-center font-semibold text-white" style={{ background: `linear-gradient(135deg, ${p.accent_color || "#ec4899"}, #6366f1)` }}>{p.display_name[0]?.toUpperCase()}</div>
+                      <Avatar p={p} size={36} />
                       <div className="min-w-0">
                         <div className="truncate flex items-center gap-1">{p.display_name} <span className="text-[9px] bg-white/10 rounded px-1 font-bold">Lv{p.level}</span></div>
                         <div className="text-xs text-slate-400">{p.is_online ? "online" : "offline"}</div>
@@ -812,6 +922,32 @@ function ChatPage() {
                 );
               })}
             </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Favorite messages modal */}
+      {showFavorites && (
+        <div onClick={() => setShowFavorites(false)} className="fixed inset-0 z-50 bg-black/70 grid place-items-center px-4">
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl bg-[#1a262d] border border-white/10 p-5 shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold flex items-center gap-2"><Bookmark className="h-5 w-5 text-amber-300 fill-amber-300"/> Favorite messages</h3>
+              <button onClick={() => setShowFavorites(false)} className="p-1 rounded hover:bg-white/10"><X className="h-5 w-5"/></button>
+            </div>
+            <div className="overflow-y-auto space-y-2">
+              {favorites.length === 0 && <div className="text-sm text-slate-400 text-center py-8">No favorites yet. Hover a message and tap the bookmark.</div>}
+              {messages.filter((m) => favorites.includes(m.id)).map((m) => (
+                <div key={m.id} className="rounded-xl bg-white/5 p-3 border border-white/10">
+                  <div className="text-[10px] text-slate-400 mb-1 flex items-center justify-between">
+                    <span>{m.sender_id === userId ? "You" : activeFriend?.display_name}</span>
+                    <button onClick={() => toggleFavoriteMessage(m.id)} className="text-rose-300 hover:underline">remove</button>
+                  </div>
+                  {m.image_url && <img src={m.image_url} alt="" className="rounded-lg mb-2 max-h-40 object-cover" />}
+                  {m.content && <div className="text-sm whitespace-pre-wrap break-words">{m.content}</div>}
+                  <div className="text-[10px] text-slate-500 mt-1">{new Date(m.created_at).toLocaleString()}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
